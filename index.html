@@ -2,276 +2,144 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>嘉成的專屬網站統整 - Chia-cheng Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f2f2f7">
+    <title>嘉成的專屬網站統整</title>
     <style>
-        /* 精緻配色與全域設定 */
-        :root {
-            --bg-color: #101525;
-            --main-text: #e0e6f0;
-            --sub-text: #9ca3af;
-            --accent-blue: #3b82f6;
-            --accent-purple: #a855f7;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-border: rgba(255, 255, 255, 0.05);
-            --card-hover-border: rgba(59, 130, 246, 0.4);
-            --icon-gradient-1: #3b82f6;
-            --icon-gradient-2: #2563eb;
-        }
-
+        /* iOS 全局設定 */
         body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-            background-color: var(--bg-color);
-            background: radial-gradient(circle at top right, #1a2a47 0%, #101525 60%),
-                        radial-gradient(circle at bottom left, #101525 0%, #1a2a47 60%);
+            /* 強制使用蘋果系統字體 */
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            background-color: #f2f2f7; /* iOS 經典淺灰背景 */
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            color: var(--main-text);
-            padding: 50px 20px;
+            color: #1c1c1e;
+            padding: 40px 20px;
             box-sizing: border-box;
-            position: relative;
-            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* 抽象幾何背景紋理 */
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2v-4h4v-2H6zM36 4V0h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.5;
-            z-index: -1;
-        }
-
-        /* 精緻個人標誌與頭部 */
+        /* 頭部個人資訊 */
         .profile-header {
             text-align: center;
-            margin-bottom: 60px;
-            position: relative;
+            margin-bottom: 32px;
         }
 
         .profile-avatar {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            width: 96px;
+            height: 96px;
+            background: #ffffff;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
-            font-weight: 700;
-            color: #ffffff;
-            margin: 0 auto 20px auto;
-            position: relative;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4),
-                        0 0 40px rgba(168, 85, 247, 0.2);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-        .profile-avatar:hover {
-            transform: scale(1.05);
-        }
-
-        /* 圖形化標誌元素 */
-        .profile-avatar::after {
-            content: "C";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 900;
-            color: #ffffff;
-            font-size: 56px;
-            letter-spacing: -2px;
-            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .profile-avatar::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+            font-size: 40px;
+            margin: 0 auto 12px auto;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            /* 如果你有自己的頭貼，可以把上面清空，換成下面這行 */
+            /* background-image: url('你的圖片網址'); background-size: cover; */
         }
 
         .profile-header h1 {
             margin: 0;
-            font-size: 28px;
-            color: #ffffff;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.4px;
         }
 
         .profile-header p {
-            margin: 10px 0 0 0;
-            color: var(--sub-text);
-            font-size: 16px;
-            letter-spacing: 0.2px;
+            margin: 4px 0 0 0;
+            color: #8e8e93; /* iOS 次要文字顏色 */
+            font-size: 15px;
         }
 
-        /* 連結卡片容器與玻璃擬態 (Glassmorphism) */
+        /* 連結清單容器 */
         .links-container {
             width: 100%;
-            max-width: 550px;
+            max-width: 420px; /* 模擬手機螢幕寬度 */
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 12px; /* 卡片之間的間距 */
         }
 
-        /* 精緻連結卡片設計 */
+        /* iOS 風格圓角卡片 */
         .link-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 22px 28px;
-            border-radius: 16px;
+            background: #ffffff;
+            padding: 16px 20px;
+            border-radius: 16px; /* 蘋果愛用的大圓角 */
             text-decoration: none;
-            color: var(--main-text);
-            border: 1px solid var(--card-border);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            color: #1c1c1e;
             display: flex;
             align-items: center;
-            position: relative;
-            overflow: hidden;
+            transition: background-color 0.2s ease, transform 0.1s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02); /* 極淡的陰影，增加立體感 */
         }
 
-        /* 懸停效果升級 */
-        .link-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2),
-                        0 0 15px rgba(59, 130, 246, 0.2);
-            border-color: var(--card-hover-border);
-            background: rgba(255, 255, 255, 0.05);
+        /* 按下去的回饋感 */
+        .link-card:active {
+            background-color: #e5e5ea;
+            transform: scale(0.98);
         }
 
-        /* 卡片內部微小細節 */
-        .link-card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.1) 0%, rgba(255, 255, 255, 0) 60%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .link-card:hover::before {
-            opacity: 1;
-        }
-
-        /* 精細圖標設計 */
-        .link-icon-container {
-            width: 44px;
-            height: 44px;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 12px;
+        /* 左側的小圖示區塊 (類似 App Icon) */
+        .link-icon-wrapper {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px; /* App Icon 圓角 */
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 20px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            transition: all 0.3s ease;
+            font-size: 20px;
+            margin-right: 16px;
+            background-color: #f2f2f7;
         }
 
-        .link-card:hover .link-icon-container {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: rgba(59, 130, 246, 0.3);
-            transform: scale(1.1);
-        }
-
-        .link-icon {
-            font-size: 22px;
-            background: linear-gradient(135deg, var(--icon-gradient-1), var(--icon-gradient-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* 卡片標題與描述 */
-        .link-details {
+        /* 標題文字 */
+        .link-title {
+            font-size: 17px;
+            font-weight: 500;
             flex-grow: 1;
         }
 
-        .link-title {
-            font-size: 17px;
-            font-weight: 600;
-            letter-spacing: 0.1px;
-            margin-bottom: 2px;
-            transition: color 0.3s ease;
-        }
-
-        .link-card:hover .link-title {
-            color: #ffffff;
-        }
-
-        /* 優雅的右箭頭圖標 */
-        .link-arrow-container {
-            color: var(--sub-text);
-            font-size: 18px;
-            transition: transform 0.3s ease, color 0.3s ease;
-            position: relative;
+        /* 右側的 iOS 箭頭 (Chevron) */
+        .link-arrow {
+            color: #c7c7cc;
             display: flex;
             align-items: center;
         }
 
-        .link-card:hover .link-arrow-container {
-            transform: translateX(5px);
-            color: var(--accent-blue);
+        .link-arrow svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
         }
 
-        /* 微小裝飾性元素與動畫 */
-        .link-arrow {
-            transition: transform 0.3s ease;
-        }
-
-        .link-card:hover .link-arrow {
-            transform: scaleX(1.2);
-        }
-
-        /* 底部版權宣告升級 */
+        /* 底部版權宣告 */
         .footer {
-            margin-top: auto;
-            padding-top: 60px;
+            margin-top: 40px;
             font-size: 13px;
-            color: var(--sub-text);
-            opacity: 0.7;
-            letter-spacing: 0.1px;
+            color: #8e8e93;
         }
     </style>
-    <!-- 引入 Montserrat 字體用於標誌 -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="profile-header">
-        <div class="profile-avatar"></div>
-        <h1>Chia-cheng</h1>
-        <p>歡迎來到我的個人品牌與專案門戶</p>
+        <div class="profile-avatar">👨🏻‍💻</div>
+        <h1>嘉成</h1>
+        <p>作品集與實用工具統整</p>
     </div>
 
     <div class="links-container" id="links-container">
-        <!-- 資料將從 Firebase 動態載入到這裡 -->
-        <p style="text-align: center; color: var(--sub-text); font-size: 14px;">資料載入中...</p>
+        <!-- 資料會從 Firebase 動態載入 -->
+        <p style="text-align: center; color: #8e8e93; font-size: 15px;">載入中...</p>
     </div>
 
     <div class="footer">
-        &copy; 2026 Chia-cheng. All rights reserved.
+        &copy; 2026 嘉成
     </div>
 
     <!-- Firebase 邏輯區塊 -->
@@ -279,7 +147,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 你專屬的真實 Firebase Config
+        // 你的 Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAxObm0QEV7Zk9rMI6SbsCRXHKc765YxIk",
             authDomain: "chiacheng-3f785.firebaseapp.com",
@@ -293,65 +161,60 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 為不同連結項目定義精緻圖標
-        const icons = {
-            supertool: "🔧",
-            ai: "🤖",
-            family: "🏠",
-            default: "↗️"
-        };
+        // 分配圖示顏色的陣列 (讓畫面看起來更繽紛，像真的 App)
+        const colors = [
+            { bg: '#e0f2fe', text: '🔧' }, // 淺藍工具
+            { bg: '#fce7f3', text: '✨' }, // 粉紅 AI
+            { bg: '#dcfce7', text: '🏠' }, // 淺綠家庭
+            { bg: '#fef08a', text: '⚡' }, // 黃色
+            { bg: '#e5e7eb', text: '🌐' }  // 灰色預設
+        ];
 
-        // 讀取資料並產生 HTML 卡片的函數
         async function loadLinks() {
             const container = document.getElementById('links-container');
             
             try {
-                // 查詢資料，並依照建立時間遞減排序
                 const q = query(collection(db, "links"), orderBy("createdAt", "desc"));
                 const querySnapshot = await getDocs(q);
                 
-                container.innerHTML = ''; // 清空原本的「載入中...」字樣
+                container.innerHTML = '';
                 
                 if (querySnapshot.empty) {
-                    container.innerHTML = '<p style="text-align: center; color: var(--sub-text); font-size: 14px;">目前還沒有新增任何連結喔！<br>請前往 <a href="/admin.html" style="color:var(--accent-blue); text-decoration: none;">後台</a> 新增。</p>';
+                    container.innerHTML = '<p style="text-align: center; color: #8e8e93; font-size: 15px;">尚無任何連結。<br><a href="/admin.html" style="color:#007aff; text-decoration:none;">前往新增</a></p>';
                     return;
                 }
 
-                // 將抓到的每一筆資料做成卡片
+                let colorIndex = 0;
+
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     const a = document.createElement('a');
                     a.href = data.url;
                     a.className = 'link-card';
-                    a.target = '_blank'; // 開啟新分頁
-
-                    // 根據標題或連結自動選擇圖標
-                    let icon = icons.default;
-                    const lowerTitle = data.title.toLowerCase();
-                    if (lowerTitle.includes('supertool')) icon = icons.supertool;
-                    else if (lowerTitle.includes('ai')) icon = icons.ai;
-                    else if (lowerTitle.includes('family')) icon = icons.family;
+                    a.target = '_blank';
                     
+                    // 根據順序循環分配背景顏色和圖示
+                    const currentStyle = colors[colorIndex % colors.length];
+                    
+                    // iOS 的經典向右箭頭 SVG
+                    const chevronSvg = `<svg viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>`;
+
                     a.innerHTML = `
-                        <div class="link-icon-container">
-                            <span class="link-icon">${icon}</span>
+                        <div class="link-icon-wrapper" style="background-color: ${currentStyle.bg};">
+                            ${currentStyle.text}
                         </div>
-                        <div class="link-details">
-                            <div class="link-title">${data.title}</div>
-                        </div>
-                        <div class="link-arrow-container">
-                            <span class="link-arrow">↗</span>
-                        </div>
+                        <div class="link-title">${data.title}</div>
+                        <div class="link-arrow">${chevronSvg}</div>
                     `;
                     container.appendChild(a);
+                    colorIndex++;
                 });
             } catch (error) {
                 console.error("載入失敗:", error);
-                container.innerHTML = `<p style="text-align: center; color: #ef4444; font-size: 14px;">資料讀取失敗，請確認 API 金鑰限制是否設定正確。</p>`;
+                container.innerHTML = `<p style="text-align: center; color: #ff3b30;">載入失敗，請檢查設定。</p>`;
             }
         }
 
-        // 執行載入
         loadLinks();
     </script>
 </body>
