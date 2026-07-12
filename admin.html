@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>網站後台管理</title>
+</head>
+<body>
+    <h1>管理員後台</h1>
+
+    <!-- 登入區塊 -->
+    <div id="login-section">
+        <input type="email" id="email" placeholder="管理員信箱">
+        <input type="password" id="password" placeholder="密碼">
+        <button id="login-btn">登入</button>
+    </div>
+
+    <!-- 管理區塊 (預設隱藏，登入後才顯示) -->
+    <div id="admin-section" style="display: none;">
+        <h3>新增網站連結</h3>
+        <input type="text" id="title" placeholder="網站標題 (例: Supertool)">
+        <input type="url" id="url" placeholder="網址連結 (例: https://...)">
+        <button id="add-btn">新增至首頁</button>
+        <button id="logout-btn">登出</button>
+    </div>
+
+    <script type="module">
+        // 1. 引入 Firebase 核心與服務
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // 2. 貼上你 Firebase 專案設定裡的 config
+        const firebaseConfig = {
+            apiKey: "你的_API_KEY",
+            authDomain: "你的_PROJECT_ID.firebaseapp.com",
+            projectId: "你的_PROJECT_ID",
+            // ...其他設定
+        };
+
+        // 3. 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // 抓取畫面上的 DOM 元素
+        const loginSection = document.getElementById('login-section');
+        const adminSection = document.getElementById('admin-section');
+
+        // 4. 監聽登入狀態
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // 已登入：隱藏登入框，顯示管理介面
+                loginSection.style.display = 'none';
+                adminSection.style.display = 'block';
+            } else {
+                // 未登入
+                loginSection.style.display = 'block';
+                adminSection.style.display = 'none';
+            }
+        });
+
+        // 5. 實作登入功能
+        document.getElementById('login-btn').addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => alert("登入成功！"))
+                .catch((error) => alert("登入失敗：" + error.message));
+        });
+
+        // 6. 實作新增資料到 Firestore 的功能
+        document.getElementById('add-btn').addEventListener('click', async () => {
+            const title = document.getElementById('title').value;
+            const url = document.getElementById('url').value;
+            
+            try {
+                // 假設我們把資料存在名為 "links" 的集合 (collection) 中
+                await addDoc(collection(db, "links"), {
+                    title: title,
+                    url: url,
+                    createdAt: new Date()
+                });
+                alert("新增成功！你可以去首頁看看了。");
+                document.getElementById('title').value = '';
+                document.getElementById('url').value = '';
+            } catch (e) {
+                alert("新增失敗，請檢查權限：" + e.message);
+            }
+        });
+
+        // 實作登出
+        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+    </script>
+</body>
+</html>
