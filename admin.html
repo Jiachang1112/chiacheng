@@ -2,42 +2,156 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>網站後台管理</title>
+    <style>
+        /* 全局設定 */
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        /* 卡片容器設計 */
+        .card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 24px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        /* 輸入框設計 */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* 按鈕設計 */
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            margin-top: 8px;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        /* 提示文字 */
+        .hint {
+            text-align: center;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>管理員後台</h1>
 
-    <!-- 登入區塊 -->
-    <div id="login-section">
-        <input type="email" id="email" placeholder="管理員信箱">
-        <input type="password" id="password" placeholder="密碼">
-        <button id="login-btn">登入</button>
+    <div class="card">
+        <!-- 登入區塊 -->
+        <div id="login-section">
+            <h2>管理員登入</h2>
+            <p class="hint">請輸入您的驗證資訊以進入後台</p>
+            <div class="input-group">
+                <input type="email" id="email" placeholder="管理員信箱 (例如: bruce...)">
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="密碼">
+            </div>
+            <button id="login-btn" class="btn-primary">登入</button>
+        </div>
+
+        <!-- 管理區塊 (預設隱藏) -->
+        <div id="admin-section" style="display: none;">
+            <h2>新增專案連結</h2>
+            <p class="hint">資料將自動同步至首頁</p>
+            <div class="input-group">
+                <input type="text" id="title" placeholder="網站標題 (例: Supertool 工具箱)">
+            </div>
+            <div class="input-group">
+                <input type="url" id="url" placeholder="網址連結 (例: https://...)">
+            </div>
+            <button id="add-btn" class="btn-primary">發布至首頁</button>
+            <button id="logout-btn" class="btn-danger">登出</button>
+        </div>
     </div>
 
-    <!-- 管理區塊 (預設隱藏，登入後才顯示) -->
-    <div id="admin-section" style="display: none;">
-        <h3>新增網站連結</h3>
-        <input type="text" id="title" placeholder="網站標題 (例: Supertool)">
-        <input type="url" id="url" placeholder="網址連結 (例: https://...)">
-        <button id="add-btn">新增至首頁</button>
-        <button id="logout-btn">登出</button>
-    </div>
-
+    <!-- Firebase 邏輯區塊 -->
     <script type="module">
-        // 1. 引入 Firebase 核心與服務
+        // 使用 CDN 引入 Firebase (適用於純 HTML 靜態網頁)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 2. 貼上你 Firebase 專案設定裡的 config
+        // 你專屬的真實 Firebase Config
         const firebaseConfig = {
-            apiKey: "你的_API_KEY",
-            authDomain: "你的_PROJECT_ID.firebaseapp.com",
-            projectId: "你的_PROJECT_ID",
-            // ...其他設定
+            apiKey: "AIzaSyAxObm0QEV7Zk9rMI6SbsCRXHKc765YxIk",
+            authDomain: "chiacheng-3f785.firebaseapp.com",
+            projectId: "chiacheng-3f785",
+            storageBucket: "chiacheng-3f785.firebasestorage.app",
+            messagingSenderId: "557068915414",
+            appId: "1:557068915414:web:a9ab0209daa743487def77",
+            measurementId: "G-CV97Q9XXTC"
         };
 
-        // 3. 初始化 Firebase
+        // 初始化 Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -45,51 +159,68 @@
         // 抓取畫面上的 DOM 元素
         const loginSection = document.getElementById('login-section');
         const adminSection = document.getElementById('admin-section');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const titleInput = document.getElementById('title');
+        const urlInput = document.getElementById('url');
 
-        // 4. 監聽登入狀態
+        // 監聽登入狀態切換介面
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // 已登入：隱藏登入框，顯示管理介面
                 loginSection.style.display = 'none';
                 adminSection.style.display = 'block';
             } else {
-                // 未登入
                 loginSection.style.display = 'block';
                 adminSection.style.display = 'none';
             }
         });
 
-        // 5. 實作登入功能
+        // 登入按鈕事件
         document.getElementById('login-btn').addEventListener('click', () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            if(!email || !password) {
+                alert("請輸入信箱與密碼！");
+                return;
+            }
+
             signInWithEmailAndPassword(auth, email, password)
-                .then(() => alert("登入成功！"))
-                .catch((error) => alert("登入失敗：" + error.message));
+                .catch((error) => alert("登入失敗，請檢查帳號密碼。"));
         });
 
-        // 6. 實作新增資料到 Firestore 的功能
+        // 新增資料按鈕事件
         document.getElementById('add-btn').addEventListener('click', async () => {
-            const title = document.getElementById('title').value;
-            const url = document.getElementById('url').value;
+            const title = titleInput.value;
+            const url = urlInput.value;
             
+            if(!title || !url) {
+                alert("標題和網址都不能是空的喔！");
+                return;
+            }
+
             try {
-                // 假設我們把資料存在名為 "links" 的集合 (collection) 中
+                // 將資料寫入名為 "links" 的集合中
                 await addDoc(collection(db, "links"), {
                     title: title,
                     url: url,
                     createdAt: new Date()
                 });
-                alert("新增成功！你可以去首頁看看了。");
-                document.getElementById('title').value = '';
-                document.getElementById('url').value = '';
+                alert("✅ 新增成功！");
+                titleInput.value = '';
+                urlInput.value = '';
             } catch (e) {
-                alert("新增失敗，請檢查權限：" + e.message);
+                alert("新增失敗，請檢查 Firestore 規則或網路連線：" + e.message);
             }
         });
 
-        // 實作登出
-        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+        // 登出按鈕事件
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                emailInput.value = '';
+                passwordInput.value = '';
+            });
+        });
     </script>
 </body>
 </html>
