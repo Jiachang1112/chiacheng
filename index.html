@@ -6,118 +6,129 @@
     <meta name="theme-color" content="#f2f2f7">
     <title>嘉成的專屬網站統整</title>
     <style>
-        /* iOS 全局設定 */
+        /* iOS 原生全域設定 */
         body {
-            /* 強制使用蘋果系統字體 */
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-            background-color: #f2f2f7; /* iOS 經典淺灰背景 */
+            background-color: #f2f2f7; /* iOS 系統底色 */
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            color: #1c1c1e;
-            padding: 40px 20px;
+            color: #000000;
+            padding: 50px 20px;
             box-sizing: border-box;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 頭部個人資訊 */
+        /* 個人首頁頭部 */
         .profile-header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 36px;
         }
 
         .profile-avatar {
-            width: 96px;
-            height: 96px;
-            background: #ffffff;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
-            margin: 0 auto 12px auto;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-            /* 如果你有自己的頭貼，可以把上面清空，換成下面這行 */
-            /* background-image: url('你的圖片網址'); background-size: cover; */
+            font-size: 46px;
+            margin: 0 auto 16px auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 2px solid #ffffff;
         }
 
         .profile-header h1 {
             margin: 0;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 600;
-            letter-spacing: -0.4px;
+            letter-spacing: -0.5px;
         }
 
         .profile-header p {
-            margin: 4px 0 0 0;
-            color: #8e8e93; /* iOS 次要文字顏色 */
+            margin: 6px 0 0 0;
+            color: #8e8e93;
             font-size: 15px;
+            font-weight: 400;
         }
 
-        /* 連結清單容器 */
-        .links-container {
+        /* iOS 群組列表容器 */
+        .list-container {
             width: 100%;
-            max-width: 420px; /* 模擬手機螢幕寬度 */
-            display: flex;
-            flex-direction: column;
-            gap: 12px; /* 卡片之間的間距 */
+            max-width: 420px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden; /* 確保內容不會超出版圓角 */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
-        /* iOS 風格圓角卡片 */
-        .link-card {
-            background: #ffffff;
-            padding: 16px 20px;
-            border-radius: 16px; /* 蘋果愛用的大圓角 */
-            text-decoration: none;
-            color: #1c1c1e;
+        /* 單一列表項目 */
+        .list-item {
             display: flex;
             align-items: center;
-            transition: background-color 0.2s ease, transform 0.1s;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02); /* 極淡的陰影，增加立體感 */
+            text-decoration: none;
+            color: #000000;
+            background-color: #ffffff;
+            transition: background-color 0.15s;
         }
 
-        /* 按下去的回饋感 */
-        .link-card:active {
+        /* 點擊時的 iOS 原生反饋色 */
+        .list-item:active {
             background-color: #e5e5ea;
-            transform: scale(0.98);
         }
 
-        /* 左側的小圖示區塊 (類似 App Icon) */
-        .link-icon-wrapper {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px; /* App Icon 圓角 */
+        /* 左側 App 圖示區塊 */
+        .list-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px; /* 蘋果標準的平滑圓角 */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            margin-right: 16px;
-            background-color: #f2f2f7;
+            font-size: 18px;
+            margin: 10px 16px;
+            color: white;
+            flex-shrink: 0;
         }
 
-        /* 標題文字 */
-        .link-title {
-            font-size: 17px;
-            font-weight: 500;
+        /* 右側文字與分隔線區塊 */
+        .list-body {
             flex-grow: 1;
+            display: flex;
+            align-items: center;
+            padding: 14px 16px 14px 0; /* 右側保留 padding，左側貼齊 icon 區塊 */
+            border-bottom: 0.5px solid #c6c6c8; /* iOS 經典極細分隔線 */
         }
 
-        /* 右側的 iOS 箭頭 (Chevron) */
-        .link-arrow {
+        /* 確保最後一個項目沒有底線，符合 iOS 規範 */
+        .list-item:last-child .list-body {
+            border-bottom: none;
+        }
+
+        .list-title {
+            font-size: 17px;
+            font-weight: 400;
+            flex-grow: 1;
+            letter-spacing: -0.2px;
+        }
+
+        /* 向右箭頭 */
+        .list-chevron {
             color: #c7c7cc;
             display: flex;
             align-items: center;
         }
 
-        .link-arrow svg {
+        .list-chevron svg {
             width: 20px;
             height: 20px;
             fill: currentColor;
         }
 
-        /* 底部版權宣告 */
+        /* 底部版權 */
         .footer {
             margin-top: 40px;
             font-size: 13px;
@@ -130,24 +141,24 @@
     <div class="profile-header">
         <div class="profile-avatar">👨🏻‍💻</div>
         <h1>嘉成</h1>
-        <p>作品集與實用工具統整</p>
+        <p>網站統整與專案導覽</p>
     </div>
 
-    <div class="links-container" id="links-container">
-        <!-- 資料會從 Firebase 動態載入 -->
-        <p style="text-align: center; color: #8e8e93; font-size: 15px;">載入中...</p>
+    <!-- 這是包裝所有連結的白色大圓角容器 -->
+    <div class="list-container" id="links-container">
+        <div style="padding: 20px; text-align: center; color: #8e8e93; font-size: 15px;">
+            資料載入中...
+        </div>
     </div>
 
     <div class="footer">
         &copy; 2026 嘉成
     </div>
 
-    <!-- Firebase 邏輯區塊 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 你的 Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAxObm0QEV7Zk9rMI6SbsCRXHKc765YxIk",
             authDomain: "chiacheng-3f785.firebaseapp.com",
@@ -161,13 +172,13 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 分配圖示顏色的陣列 (讓畫面看起來更繽紛，像真的 App)
-        const colors = [
-            { bg: '#e0f2fe', text: '🔧' }, // 淺藍工具
-            { bg: '#fce7f3', text: '✨' }, // 粉紅 AI
-            { bg: '#dcfce7', text: '🏠' }, // 淺綠家庭
-            { bg: '#fef08a', text: '⚡' }, // 黃色
-            { bg: '#e5e7eb', text: '🌐' }  // 灰色預設
+        // iOS 系統原色調配 (漸層底色 + Emoji)
+        const iosStyles = [
+            { bg: 'linear-gradient(180deg, #34C759 0%, #28CD41 100%)', icon: '🔧' }, // 系統綠
+            { bg: 'linear-gradient(180deg, #5E5CE6 0%, #5856D6 100%)', icon: '🤖' }, // 系統靛藍
+            { bg: 'linear-gradient(180deg, #FF9500 0%, #FF9500 100%)', icon: '🏠' }, // 系統橘
+            { bg: 'linear-gradient(180deg, #007AFF 0%, #007AFF 100%)', icon: '🌐' }, // 系統藍
+            { bg: 'linear-gradient(180deg, #FF2D55 0%, #FF375F 100%)', icon: '✨' }  // 系統粉
         ];
 
         async function loadLinks() {
@@ -177,41 +188,40 @@
                 const q = query(collection(db, "links"), orderBy("createdAt", "desc"));
                 const querySnapshot = await getDocs(q);
                 
-                container.innerHTML = '';
+                container.innerHTML = ''; // 清空載入中提示
                 
                 if (querySnapshot.empty) {
-                    container.innerHTML = '<p style="text-align: center; color: #8e8e93; font-size: 15px;">尚無任何連結。<br><a href="/admin.html" style="color:#007aff; text-decoration:none;">前往新增</a></p>';
+                    container.innerHTML = '<div style="padding: 20px; text-align: center; color: #8e8e93; font-size: 15px;">尚無任何連結<br><br><a href="/admin.html" style="color:#007aff; text-decoration:none;">前往新增</a></div>';
                     return;
                 }
 
-                let colorIndex = 0;
+                let index = 0;
+                const chevronSvg = `<svg viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>`;
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
+                    const style = iosStyles[index % iosStyles.length];
+                    
                     const a = document.createElement('a');
                     a.href = data.url;
-                    a.className = 'link-card';
+                    a.className = 'list-item';
                     a.target = '_blank';
                     
-                    // 根據順序循環分配背景顏色和圖示
-                    const currentStyle = colors[colorIndex % colors.length];
-                    
-                    // iOS 的經典向右箭頭 SVG
-                    const chevronSvg = `<svg viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>`;
-
                     a.innerHTML = `
-                        <div class="link-icon-wrapper" style="background-color: ${currentStyle.bg};">
-                            ${currentStyle.text}
+                        <div class="list-icon" style="background: ${style.bg};">
+                            ${style.icon}
                         </div>
-                        <div class="link-title">${data.title}</div>
-                        <div class="link-arrow">${chevronSvg}</div>
+                        <div class="list-body">
+                            <div class="list-title">${data.title}</div>
+                            <div class="list-chevron">${chevronSvg}</div>
+                        </div>
                     `;
                     container.appendChild(a);
-                    colorIndex++;
+                    index++;
                 });
             } catch (error) {
                 console.error("載入失敗:", error);
-                container.innerHTML = `<p style="text-align: center; color: #ff3b30;">載入失敗，請檢查設定。</p>`;
+                container.innerHTML = `<div style="padding: 20px; text-align: center; color: #FF3B30;">載入失敗，請檢查權限設定</div>`;
             }
         }
 
