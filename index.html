@@ -3,121 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>嘉成的專屬網站統整</title>
+    <title>嘉成的專屬網站統整 - Chia-cheng Hub</title>
     <style>
-        /* 全局設定 */
+        /* 精緻配色與全域設定 */
+        :root {
+            --bg-color: #101525;
+            --main-text: #e0e6f0;
+            --sub-text: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-purple: #a855f7;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.05);
+            --card-hover-border: rgba(59, 130, 246, 0.4);
+            --icon-gradient-1: #3b82f6;
+            --icon-gradient-2: #2563eb;
+        }
+
         body {
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-            background-color: #f9fafb;
+            background-color: var(--bg-color);
+            background: radial-gradient(circle at top right, #1a2a47 0%, #101525 60%),
+                        radial-gradient(circle at bottom left, #101525 0%, #1a2a47 60%);
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            color: #1f2937;
-            padding: 40px 20px;
+            color: var(--main-text);
+            padding: 50px 20px;
             box-sizing: border-box;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        /* 頭部個人資訊區塊 */
+        /* 抽象幾何背景紋理 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2v-4h4v-2H6zM36 4V0h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        /* 精緻個人標誌與頭部 */
         .profile-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 60px;
+            position: relative;
         }
 
         .profile-avatar {
-            width: 100px;
-            height: 100px;
-            background-color: #3b82f6;
-            color: white;
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
-            font-weight: bold;
-            margin: 0 auto 16px auto;
-            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+            font-size: 48px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 auto 20px auto;
+            position: relative;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4),
+                        0 0 40px rgba(168, 85, 247, 0.2);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        /* 圖形化標誌元素 */
+        .profile-avatar::after {
+            content: "C";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            color: #ffffff;
+            font-size: 56px;
+            letter-spacing: -2px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-avatar::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
         }
 
         .profile-header h1 {
             margin: 0;
-            font-size: 24px;
-            color: #111827;
+            font-size: 28px;
+            color: #ffffff;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .profile-header p {
-            margin: 8px 0 0 0;
-            color: #6b7280;
-            font-size: 15px;
+            margin: 10px 0 0 0;
+            color: var(--sub-text);
+            font-size: 16px;
+            letter-spacing: 0.2px;
         }
 
-        /* 連結卡片容器 */
+        /* 連結卡片容器與玻璃擬態 (Glassmorphism) */
         .links-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 20px;
         }
 
-        /* 單一連結卡片設計 */
+        /* 精緻連結卡片設計 */
         .link-card {
-            background: #ffffff;
-            padding: 18px 24px;
-            border-radius: 12px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 22px 28px;
+            border-radius: 16px;
             text-decoration: none;
-            color: #374151;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all 0.2s ease;
+            color: var(--main-text);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            border: 1px solid #f3f4f6;
+            position: relative;
+            overflow: hidden;
         }
 
+        /* 懸停效果升級 */
         .link-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
-            border-color: #d1d5db;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2),
+                        0 0 15px rgba(59, 130, 246, 0.2);
+            border-color: var(--card-hover-border);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* 卡片內部微小細節 */
+        .link-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.1) 0%, rgba(255, 255, 255, 0) 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .link-card:hover::before {
+            opacity: 1;
+        }
+
+        /* 精細圖標設計 */
+        .link-icon-container {
+            width: 44px;
+            height: 44px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .link-card:hover .link-icon-container {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: scale(1.1);
+        }
+
+        .link-icon {
+            font-size: 22px;
+            background: linear-gradient(135deg, var(--icon-gradient-1), var(--icon-gradient-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 卡片標題與描述 */
+        .link-details {
+            flex-grow: 1;
         }
 
         .link-title {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
+            letter-spacing: 0.1px;
+            margin-bottom: 2px;
+            transition: color 0.3s ease;
         }
 
-        .link-arrow {
-            color: #9ca3af;
+        .link-card:hover .link-title {
+            color: #ffffff;
+        }
+
+        /* 優雅的右箭頭圖標 */
+        .link-arrow-container {
+            color: var(--sub-text);
             font-size: 18px;
-            transition: transform 0.2s;
+            transition: transform 0.3s ease, color 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .link-card:hover .link-arrow-container {
+            transform: translateX(5px);
+            color: var(--accent-blue);
+        }
+
+        /* 微小裝飾性元素與動畫 */
+        .link-arrow {
+            transition: transform 0.3s ease;
         }
 
         .link-card:hover .link-arrow {
-            transform: translateX(4px) translateY(-4px);
-            color: #3b82f6;
+            transform: scaleX(1.2);
         }
 
-        /* 底部版權宣告 */
+        /* 底部版權宣告升級 */
         .footer {
             margin-top: auto;
-            padding-top: 40px;
+            padding-top: 60px;
             font-size: 13px;
-            color: #9ca3af;
+            color: var(--sub-text);
+            opacity: 0.7;
+            letter-spacing: 0.1px;
         }
     </style>
+    <!-- 引入 Montserrat 字體用於標誌 -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="profile-header">
-        <div class="profile-avatar">C</div>
+        <div class="profile-avatar"></div>
         <h1>Chia-cheng</h1>
-        <p>歡迎來到我的個人網站與專案統整</p>
+        <p>歡迎來到我的個人品牌與專案門戶</p>
     </div>
 
     <div class="links-container" id="links-container">
-        <!-- 資料會從 Firebase 動態載入到這裡 -->
-        <p style="text-align: center; color: #6b7280;">資料載入中...</p>
+        <!-- 資料將從 Firebase 動態載入到這裡 -->
+        <p style="text-align: center; color: var(--sub-text); font-size: 14px;">資料載入中...</p>
     </div>
 
     <div class="footer">
@@ -143,19 +293,27 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // 為不同連結項目定義精緻圖標
+        const icons = {
+            supertool: "🔧",
+            ai: "🤖",
+            family: "🏠",
+            default: "↗️"
+        };
+
         // 讀取資料並產生 HTML 卡片的函數
         async function loadLinks() {
             const container = document.getElementById('links-container');
             
             try {
-                // 查詢資料，並依照建立時間 (createdAt) 遞減排序 (最新的在最上面)
+                // 查詢資料，並依照建立時間遞減排序
                 const q = query(collection(db, "links"), orderBy("createdAt", "desc"));
                 const querySnapshot = await getDocs(q);
                 
                 container.innerHTML = ''; // 清空原本的「載入中...」字樣
                 
                 if (querySnapshot.empty) {
-                    container.innerHTML = '<p style="text-align: center; color: #6b7280;">目前還沒有新增任何連結喔！<br>請前往 <a href="/admin.html" style="color:#3b82f6;">後台</a> 新增。</p>';
+                    container.innerHTML = '<p style="text-align: center; color: var(--sub-text); font-size: 14px;">目前還沒有新增任何連結喔！<br>請前往 <a href="/admin.html" style="color:var(--accent-blue); text-decoration: none;">後台</a> 新增。</p>';
                     return;
                 }
 
@@ -166,17 +324,30 @@
                     a.href = data.url;
                     a.className = 'link-card';
                     a.target = '_blank'; // 開啟新分頁
+
+                    // 根據標題或連結自動選擇圖標
+                    let icon = icons.default;
+                    const lowerTitle = data.title.toLowerCase();
+                    if (lowerTitle.includes('supertool')) icon = icons.supertool;
+                    else if (lowerTitle.includes('ai')) icon = icons.ai;
+                    else if (lowerTitle.includes('family')) icon = icons.family;
                     
                     a.innerHTML = `
-                        <span class="link-title">${data.title}</span>
-                        <span class="link-arrow">↗</span>
+                        <div class="link-icon-container">
+                            <span class="link-icon">${icon}</span>
+                        </div>
+                        <div class="link-details">
+                            <div class="link-title">${data.title}</div>
+                        </div>
+                        <div class="link-arrow-container">
+                            <span class="link-arrow">↗</span>
+                        </div>
                     `;
                     container.appendChild(a);
                 });
             } catch (error) {
                 console.error("載入失敗:", error);
-                // 有可能因為 createdAt 還沒有建立索引而報錯，這裡會顯示錯誤訊息
-                container.innerHTML = `<p style="text-align: center; color: #ef4444;">資料讀取失敗，請確認 API 金鑰限制是否設定正確。</p>`;
+                container.innerHTML = `<p style="text-align: center; color: #ef4444; font-size: 14px;">資料讀取失敗，請確認 API 金鑰限制是否設定正確。</p>`;
             }
         }
 
