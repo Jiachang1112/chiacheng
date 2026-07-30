@@ -1,84 +1,150 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>嘉成的個人網站 | chiacheng1112.com</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>chiacheng1112 — 深夜手記</title>
+<meta name="description" content="chiacheng1112 的個人部落格，記錄深夜裡想到的事、生活雜記與一些連結。">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2312161B'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='%23E8A33D' font-family='Georgia, serif'%3Ec%3C/text%3E%3C/svg%3E">
 </head>
-<body class="min-h-screen text-slate-800 font-sans bg-slate-50">
-  <!-- 導覽列 -->
-  <nav class="p-6 max-w-5xl mx-auto flex justify-between items-center">
-    <div class="text-2xl font-bold text-blue-600">chiacheng1112.com</div>
-    <div class="space-x-6 hidden md:block">
-      <a href="#about" class="hover:text-blue-500 font-medium">關於我</a>
-      <a href="#projects" class="hover:text-blue-500 font-medium">專案作品</a>
-      <a href="#achievements" class="hover:text-blue-500 font-medium">多元表現</a>
-    </div>
-  </nav>
+<body>
 
-  <!-- 首頁介紹 -->
-  <header id="about" class="py-20 text-center px-4">
-    <h1 class="text-5xl font-extrabold mb-6">Hello, 我是嘉成 👋</h1>
-    <p class="text-xl text-slate-600 max-w-2xl mx-auto mb-10">
-      熱愛程式開發與自動化技術的高中生。擅長將科技融入生活，從網頁開發到打造個人 AI 助理，致力於用程式解決實際問題。
-    </p>
-    <div class="flex justify-center gap-4 flex-wrap">
-      <span class="px-4 py-2 bg-slate-200 rounded-full text-sm font-semibold">Python</span>
-      <span class="px-4 py-2 bg-slate-200 rounded-full text-sm font-semibold">HTML/CSS/JS</span>
-      <span class="px-4 py-2 bg-slate-200 rounded-full text-sm font-semibold">React</span>
-      <span class="px-4 py-2 bg-slate-200 rounded-full text-sm font-semibold">Firebase</span>
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><strong>chiacheng</strong><span>1112</span></a>
+    <div class="nav-links">
+      <a href="#entries">文章</a>
+      <a href="#about">關於</a>
+      <a href="#links">連結</a>
     </div>
-  </header>
+  </div>
+</nav>
 
-  <!-- 專案區塊 -->
-  <section id="projects" class="py-16 bg-white px-4">
-    <div class="max-w-5xl mx-auto">
-      <h2 class="text-3xl font-bold mb-10 text-center">精選專案</h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="border border-slate-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-          <div class="text-xs font-bold text-blue-500 mb-2">React + Firebase</div>
-          <h3 class="text-xl font-bold mb-3">家事與點數管理系統</h3>
-          <p class="text-slate-600 text-sm leading-relaxed">雙介面設計的網頁應用，讓家長與小孩能輕鬆追蹤日常家事進度與點數獎勵。</p>
-        </div>
-        <div class="border border-slate-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-          <div class="text-xs font-bold text-blue-500 mb-2">Python + Gemini API</div>
-          <h3 class="text-xl font-bold mb-3">個人助理 LINE Bot</h3>
-          <p class="text-slate-600 text-sm leading-relaxed">串接生成式 AI 技術，打造能自然對話並協助處理日常事務的智慧聊天機器人。</p>
-        </div>
-        <div class="border border-slate-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-          <div class="text-xs font-bold text-blue-500 mb-2">Apple Shortcuts</div>
-          <h3 class="text-xl font-bold mb-3">iOS 自動化捷徑</h3>
-          <p class="text-slate-600 text-sm leading-relaxed">開發多款實用捷徑，包含複雜的日期格式化序列與外送運費自動計算工具。</p>
-        </div>
+<header class="hero" id="top">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="eyebrow">LATE NOTES · 深夜手記</p>
+    <h1>把還沒忘記的事<br>先<em>寫下來</em>。</h1>
+    <p class="lede">這裡放生活裡零散的紀錄——一些正在想的事、一些做完想留住的東西，偶爾也有可以點進去看看的連結。</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#entries">開始閱讀</a>
+      <a class="btn btn-ghost" href="#links">常用連結</a>
+    </div>
+  </div>
+</header>
+
+<section class="section" id="entries">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">文章</p>
+        <h2>最近寫的</h2>
+      </div>
+      <span class="count">共 3 篇 · 依時間排序</span>
+    </div>
+
+    <article class="entry">
+      <div class="entry-meta"><span class="no">NO. 003</span>2026.07.28</div>
+      <div class="entry-body">
+        <h3><a href="post-example.html">重新開始寫東西</a></h3>
+        <p>拖了很久終於把這個網站弄起來了。不是為了給誰看，比較像是幫自己留一個可以回頭翻的地方。</p>
+        <div class="entry-tags"><span class="tag">#隨筆</span><span class="tag">#網站</span></div>
+      </div>
+      <a class="entry-arrow" href="post-example.html">閱讀 →</a>
+    </article>
+
+    <article class="entry">
+      <div class="entry-meta"><span class="no">NO. 002</span>2026.07.14</div>
+      <div class="entry-body">
+        <h3><a href="#">最近在想的幾件小事</a></h3>
+        <p>關於效率、關於休息，還有為什麼有時候什麼都不做反而比較有生產力。</p>
+        <div class="entry-tags"><span class="tag">#生活</span></div>
+      </div>
+      <a class="entry-arrow" href="#">閱讀 →</a>
+    </article>
+
+    <article class="entry">
+      <div class="entry-meta"><span class="no">NO. 001</span>2026.06.30</div>
+      <div class="entry-body">
+        <h3><a href="#">關於這個網站</a></h3>
+        <p>chiacheng1112.com 這個網域放了很久，這篇算是第一篇正式的紀錄，說說為什麼決定開始寫。</p>
+        <div class="entry-tags"><span class="tag">#開始</span></div>
+      </div>
+      <a class="entry-arrow" href="#">閱讀 →</a>
+    </article>
+
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">關於</p>
+        <h2>Hi, 我是 Chia Cheng</h2>
       </div>
     </div>
-  </section>
-
-  <!-- 多元表現區塊 -->
-  <section id="achievements" class="py-16 px-4">
-    <div class="max-w-5xl mx-auto">
-      <h2 class="text-3xl font-bold mb-10 text-center">多元表現與生活</h2>
-      <div class="grid md:grid-cols-3 gap-6">
-        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
-          <h3 class="font-bold text-lg mb-2">學術進修</h3>
-          <p class="text-slate-600">取得 ewant 完課證書，展現自主學習熱忱，並納入學習歷程檔案。</p>
-        </div>
-        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
-          <h3 class="font-bold text-lg mb-2">體育競技</h3>
-          <p class="text-slate-600">榮獲高中羽球雙打第四名，具備良好的抗壓性與團隊默契。</p>
-        </div>
-        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
-          <h3 class="font-bold text-lg mb-2">生活紀錄</h3>
-          <p class="text-slate-600">獨立規劃台北四天三夜旅行，用心記錄每一段美好的旅程。</p>
-        </div>
+    <div class="about-grid">
+      <div class="monogram">C</div>
+      <div class="about-text">
+        <p>這裡是 <strong>chiacheng1112</strong> 的個人角落。平常喜歡在安靜的時候整理想法，寫一點生活、一點觀察，偶爾分享手上在做的東西。</p>
+        <p>沒有固定更新頻率，想到就寫，希望是誠實、不趕流量的那種文字。</p>
+        <ul class="facts">
+          <li><b>Based in</b>Kaohsiung, Taiwan</li>
+          <li><b>Writing since</b>2026</li>
+          <li><b>Currently</b>整理網站中</li>
+          <li><b>Contact</b>見下方連結</li>
+        </ul>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- 頁尾 -->
-  <footer class="py-8 text-center text-slate-500 text-sm border-t border-slate-200 mt-10">
-    <p>© 2026 嘉成. All rights reserved.</p>
-  </footer>
+<section class="section" id="links">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">連結</p>
+        <h2>可以點進去看看</h2>
+      </div>
+      <span class="count">跳轉至外部連結</span>
+    </div>
+
+    <!--
+      這一區是可自訂的「跳轉連結」按鈕。
+      每個 .link-tag 都是一個 <a href="..."> ，把 href 換成你要導向的網址即可。
+      icon 裡的兩個字母、label（標題）、sub（副標）都可以自由修改。
+    -->
+    <div class="links-grid">
+      <a class="link-tag" href="https://instagram.com/" target="_blank" rel="noopener">
+        <span class="icon">IG</span>
+        <div><div class="label">Instagram</div><div class="sub">@chiacheng1112</div></div>
+      </a>
+      <a class="link-tag" href="https://your-portfolio-link.example" target="_blank" rel="noopener">
+        <span class="icon">PF</span>
+        <div><div class="label">作品集</div><div class="sub">查看作品</div></div>
+      </a>
+      <a class="link-tag" href="mailto:hello@chiacheng1112.com">
+        <span class="icon">@</span>
+        <div><div class="label">合作邀約</div><div class="sub">hello@chiacheng1112.com</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© <span data-year></span> chiacheng1112.com</span>
+    <span>用一盞燈跟一台鍵盤做的網站</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
 </body>
 </html>
