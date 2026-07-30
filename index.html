@@ -1,231 +1,84 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#f2f2f7">
-    <title>嘉成的專屬網站統整</title>
-    <style>
-        /* iOS 原生全域設定 */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-            background-color: #f2f2f7; /* iOS 系統底色 */
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            color: #000000;
-            padding: 50px 20px;
-            box-sizing: border-box;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* 個人首頁頭部 */
-        .profile-header {
-            text-align: center;
-            margin-bottom: 36px;
-        }
-
-        .profile-avatar {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 46px;
-            margin: 0 auto 16px auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border: 2px solid #ffffff;
-        }
-
-        .profile-header h1 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-        }
-
-        .profile-header p {
-            margin: 6px 0 0 0;
-            color: #8e8e93;
-            font-size: 15px;
-            font-weight: 400;
-        }
-
-        /* iOS 群組列表容器 */
-        .list-container {
-            width: 100%;
-            max-width: 420px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            overflow: hidden; /* 確保內容不會超出版圓角 */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        }
-
-        /* 單一列表項目 */
-        .list-item {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: #000000;
-            background-color: #ffffff;
-            transition: background-color 0.15s;
-        }
-
-        /* 點擊時的 iOS 原生反饋色 */
-        .list-item:active {
-            background-color: #e5e5ea;
-        }
-
-        /* 左側 App 圖示區塊 */
-        .list-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px; /* 蘋果標準的平滑圓角 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            margin: 10px 16px;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        /* 右側文字與分隔線區塊 */
-        .list-body {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            padding: 14px 16px 14px 0; /* 右側保留 padding，左側貼齊 icon 區塊 */
-            border-bottom: 0.5px solid #c6c6c8; /* iOS 經典極細分隔線 */
-        }
-
-        /* 確保最後一個項目沒有底線，符合 iOS 規範 */
-        .list-item:last-child .list-body {
-            border-bottom: none;
-        }
-
-        .list-title {
-            font-size: 17px;
-            font-weight: 400;
-            flex-grow: 1;
-            letter-spacing: -0.2px;
-        }
-
-        /* 向右箭頭 */
-        .list-chevron {
-            color: #c7c7cc;
-            display: flex;
-            align-items: center;
-        }
-
-        .list-chevron svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
-
-        /* 底部版權 */
-        .footer {
-            margin-top: 40px;
-            font-size: 13px;
-            color: #8e8e93;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>嘉成的個人網站 | chiacheng1112.com</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-
-    <div class="profile-header">
-        <div class="profile-avatar">👨🏻‍💻</div>
-        <h1>嘉成</h1>
-        <p>網站統整與專案導覽</p>
+<body class="min-h-screen text-slate-800 font-sans bg-slate-50">
+  <!-- 導覽列 -->
+  <nav class="p-6 max-w-5xl mx-auto flex justify-between items-center">
+    <div class="text-2xl font-bold text-blue-600">chiacheng1112.com</div>
+    <div class="space-x-6 hidden md:block">
+      <a href="#about" class="hover:text-blue-500 font-medium">關於我</a>
+      <a href="#projects" class="hover:text-blue-500 font-medium">專案作品</a>
+      <a href="#achievements" class="hover:text-blue-500 font-medium">多元表現</a>
     </div>
+  </nav>
 
-    <!-- 這是包裝所有連結的白色大圓角容器 -->
-    <div class="list-container" id="links-container">
-        <div style="padding: 20px; text-align: center; color: #8e8e93; font-size: 15px;">
-            資料載入中...
+  <!-- 首頁介紹 -->
+  <header id="about" class="py-20 text-center px-4">
+    <h1 class="text-5xl font-extrabold mb-6">Hello, 我是嘉成 👋</h1>
+    <p class="text-xl text-slate-600 max-w-2xl mx-auto mb-10">
+      熱愛程式開發與自動化技術的高中生。擅長將科技融入生活，從網頁開發到打造個人 AI 助理，致力於用程式解決實際問題。
+    </p>
+    <div class="flex justify-center gap-4 flex-wrap">
+      <span class="px-4 py-2 bg-slate-200 rounded-full text-sm font-semibold">Python</span>
+      <span class="px-4 py-2 bg-slate-200 rounded-full text-sm font-semibold">HTML/CSS/JS</span>
+      <span class="px-4 py-2 bg-slate-200 rounded-full text-sm font-semibold">React</span>
+      <span class="px-4 py-2 bg-slate-200 rounded-full text-sm font-semibold">Firebase</span>
+    </div>
+  </header>
+
+  <!-- 專案區塊 -->
+  <section id="projects" class="py-16 bg-white px-4">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl font-bold mb-10 text-center">精選專案</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="border border-slate-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+          <div class="text-xs font-bold text-blue-500 mb-2">React + Firebase</div>
+          <h3 class="text-xl font-bold mb-3">家事與點數管理系統</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">雙介面設計的網頁應用，讓家長與小孩能輕鬆追蹤日常家事進度與點數獎勵。</p>
         </div>
+        <div class="border border-slate-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+          <div class="text-xs font-bold text-blue-500 mb-2">Python + Gemini API</div>
+          <h3 class="text-xl font-bold mb-3">個人助理 LINE Bot</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">串接生成式 AI 技術，打造能自然對話並協助處理日常事務的智慧聊天機器人。</p>
+        </div>
+        <div class="border border-slate-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+          <div class="text-xs font-bold text-blue-500 mb-2">Apple Shortcuts</div>
+          <h3 class="text-xl font-bold mb-3">iOS 自動化捷徑</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">開發多款實用捷徑，包含複雜的日期格式化序列與外送運費自動計算工具。</p>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div class="footer">
-        &copy; 2026 嘉成
+  <!-- 多元表現區塊 -->
+  <section id="achievements" class="py-16 px-4">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl font-bold mb-10 text-center">多元表現與生活</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+          <h3 class="font-bold text-lg mb-2">學術進修</h3>
+          <p class="text-slate-600">取得 ewant 完課證書，展現自主學習熱忱，並納入學習歷程檔案。</p>
+        </div>
+        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+          <h3 class="font-bold text-lg mb-2">體育競技</h3>
+          <p class="text-slate-600">榮獲高中羽球雙打第四名，具備良好的抗壓性與團隊默契。</p>
+        </div>
+        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+          <h3 class="font-bold text-lg mb-2">生活紀錄</h3>
+          <p class="text-slate-600">獨立規劃台北四天三夜旅行，用心記錄每一段美好的旅程。</p>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAxObm0QEV7Zk9rMI6SbsCRXHKc765YxIk",
-            authDomain: "chiacheng-3f785.firebaseapp.com",
-            projectId: "chiacheng-3f785",
-            storageBucket: "chiacheng-3f785.firebasestorage.app",
-            messagingSenderId: "557068915414",
-            appId: "1:557068915414:web:a9ab0209daa743487def77",
-            measurementId: "G-CV97Q9XXTC"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // iOS 系統原色調配 (漸層底色 + Emoji)
-        const iosStyles = [
-            { bg: 'linear-gradient(180deg, #34C759 0%, #28CD41 100%)', icon: '🔧' }, // 系統綠
-            { bg: 'linear-gradient(180deg, #5E5CE6 0%, #5856D6 100%)', icon: '🤖' }, // 系統靛藍
-            { bg: 'linear-gradient(180deg, #FF9500 0%, #FF9500 100%)', icon: '🏠' }, // 系統橘
-            { bg: 'linear-gradient(180deg, #007AFF 0%, #007AFF 100%)', icon: '🌐' }, // 系統藍
-            { bg: 'linear-gradient(180deg, #FF2D55 0%, #FF375F 100%)', icon: '✨' }  // 系統粉
-        ];
-
-        async function loadLinks() {
-            const container = document.getElementById('links-container');
-            
-            try {
-                const q = query(collection(db, "links"), orderBy("createdAt", "desc"));
-                const querySnapshot = await getDocs(q);
-                
-                container.innerHTML = ''; // 清空載入中提示
-                
-                if (querySnapshot.empty) {
-                    container.innerHTML = '<div style="padding: 20px; text-align: center; color: #8e8e93; font-size: 15px;">尚無任何連結<br><br><a href="/admin.html" style="color:#007aff; text-decoration:none;">前往新增</a></div>';
-                    return;
-                }
-
-                let index = 0;
-                const chevronSvg = `<svg viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>`;
-
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const style = iosStyles[index % iosStyles.length];
-                    
-                    const a = document.createElement('a');
-                    a.href = data.url;
-                    a.className = 'list-item';
-                    a.target = '_blank';
-                    
-                    a.innerHTML = `
-                        <div class="list-icon" style="background: ${style.bg};">
-                            ${style.icon}
-                        </div>
-                        <div class="list-body">
-                            <div class="list-title">${data.title}</div>
-                            <div class="list-chevron">${chevronSvg}</div>
-                        </div>
-                    `;
-                    container.appendChild(a);
-                    index++;
-                });
-            } catch (error) {
-                console.error("載入失敗:", error);
-                container.innerHTML = `<div style="padding: 20px; text-align: center; color: #FF3B30;">載入失敗，請檢查權限設定</div>`;
-            }
-        }
-
-        loadLinks();
-    </script>
+  <!-- 頁尾 -->
+  <footer class="py-8 text-center text-slate-500 text-sm border-t border-slate-200 mt-10">
+    <p>© 2026 嘉成. All rights reserved.</p>
+  </footer>
 </body>
 </html>
