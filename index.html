@@ -671,6 +671,7 @@
       <div class="admin-tabs">
         <button class="admin-tab active" data-tab="basic" type="button">基本資料</button>
         <button class="admin-tab" data-tab="projects" type="button">專案</button>
+        <button class="admin-tab" data-tab="stack" type="button">技術</button>
         <button class="admin-tab" data-tab="logs" type="button">開發日誌</button>
         <button class="admin-tab" data-tab="export" type="button">匯出／匯入</button>
       </div>
@@ -723,6 +724,16 @@
           <button class="btn btn-primary" id="saveProjectsBtn" type="button">儲存所有專案</button>
         </div>
         <p class="admin-msg" id="projectsMsg"></p>
+      </div>
+
+      <!-- 新增技術管理區塊 -->
+      <div class="admin-pane" id="pane-stack">
+        <div id="adminStackList"></div>
+        <div class="btn-row">
+          <button class="btn" id="addStackBtn" type="button">＋ 新增技術分類</button>
+          <button class="btn btn-primary" id="saveStackBtn" type="button">儲存技術清單</button>
+        </div>
+        <p class="admin-msg" id="stackMsg"></p>
       </div>
 
       <div class="admin-pane" id="pane-logs">
@@ -800,6 +811,12 @@ let SITE_DATA = {
       date: '2026-08-22',
       content: '網站開發者日誌正式上線囉！可以在這裡記錄一些隨筆或是開發進度更新。'
     }
+  ],
+  stack: [
+    { title: '訊息與 AI', items: ['LINE Messaging API', 'Gemini API', 'Google AI Studio', 'Dify'] },
+    { title: '資料庫', items: ['Firebase', 'Supabase', 'Neon'] },
+    { title: '部署與託管', items: ['Render', 'Vercel', 'Zeabur', 'Cloudflare Pages', 'Cloudflare Workers', 'GitHub Pages'] },
+    { title: '排程・通知・其他', items: ['Upstash QStash', 'cron-job.org', 'UptimeRobot', 'Formspree', 'Brevo', 'Workers KV', 'Google Cloud', 'Oracle Cloud'] }
   ],
   projects: [
     {
@@ -933,14 +950,6 @@ let SITE_DATA = {
   ]
 };
 
-// ============ STACK GROUPS (for 技術 section) ============
-const STACK_GROUPS = [
-  { title: '訊息與 AI', items: ['LINE Messaging API', 'Gemini API', 'Google AI Studio', 'Dify'] },
-  { title: '資料庫', items: ['Firebase', 'Supabase', 'Neon'] },
-  { title: '部署與託管', items: ['Render', 'Vercel', 'Zeabur', 'Cloudflare Pages', 'Cloudflare Workers', 'GitHub Pages'] },
-  { title: '排程・通知・其他', items: ['Upstash QStash', 'cron-job.org', 'UptimeRobot', 'Formspree', 'Brevo', 'Workers KV', 'Google Cloud', 'Oracle Cloud'] }
-];
-
 // ============ STORAGE ADAPTER ============
 // 改用 Firebase Firestore 儲存
 let memoryFallback = null;
@@ -1066,10 +1075,11 @@ function applyTextFields() {
 
 function renderStack() {
   const el = document.getElementById('stackGroups');
-  el.innerHTML = STACK_GROUPS.map(g => `
+  const groups = SITE_DATA.stack || [];
+  el.innerHTML = groups.map(g => `
     <div class="stack-group">
       <div class="stack-group-title">${escapeHtml(g.title)}</div>
-      <div class="chip-row">${g.items.map(i => `<span class="chip">${escapeHtml(i)}</span>`).join('')}</div>
+      <div class="chip-row">${(g.items || []).map(i => `<span class="chip">${escapeHtml(i)}</span>`).join('')}</div>
     </div>
   `).join('');
 }
@@ -1293,6 +1303,7 @@ function loadFormFromData() {
   document.getElementById('in-contactOther').value = (SITE_DATA.contact.other || []).map(o => `${o.label}｜${o.url}`).join('\n');
   renderAdminProjects();
   renderAdminLogs();
+  renderAdminStack();
 }
 
 document.getElementById('saveBasicBtn').addEventListener('click', async () => {
@@ -1363,6 +1374,56 @@ document.getElementById('saveProjectsBtn').addEventListener('click', async () =>
   renderAll();
   const ok = await storageAdapter.set(SITE_DATA);
   document.getElementById('projectsMsg').textContent = ok ? '已儲存，前台也更新了。' : '存到資料庫失敗，但前台已經套用新內容 — 記得用匯出功能備份。';
+});
+
+// 新增技術管理邏輯
+function renderAdminStack() {
+  const wrap = document.getElementById('adminStackList');
+  if (!SITE_DATA.stack) SITE_DATA.stack = [];
+  wrap.innerHTML = SITE_DATA.stack.map((g, i) => `
+    <div class="admin-project-card" data-idx="${i}">
+      <div class="admin-project-head">
+        <span>分類 #${i + 1}</span>
+        <button type="button" class="btn btn-danger" data-action="delete-stack" data-idx="${i}">刪除</button>
+      </div>
+      <div class="field"><label>分類名稱</label><input type="text" data-stack-field="title" data-idx="${i}" value="${escapeAttr(g.title)}"></div>
+      <div class="field"><label>技術項目（逗號分隔）</label><input type="text" data-stack-field="items" data-idx="${i}" value="${escapeAttr((g.items || []).join(', '))}"></div>
+    </div>
+  `).join('');
+
+  wrap.querySelectorAll('[data-action="delete-stack"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = +btn.dataset.idx;
+      if (confirm('確定要刪除分類「' + SITE_DATA.stack[idx].title + '」嗎？')) {
+        SITE_DATA.stack.splice(idx, 1);
+        renderAdminStack();
+      }
+    });
+  });
+}
+
+document.getElementById('addStackBtn').addEventListener('click', () => {
+  if (!SITE_DATA.stack) SITE_DATA.stack = [];
+  SITE_DATA.stack.push({ title: '新分類', items: [] });
+  renderAdminStack();
+});
+
+document.getElementById('saveStackBtn').addEventListener('click', async () => {
+  if (!SITE_DATA.stack) SITE_DATA.stack = [];
+  document.querySelectorAll('#adminStackList [data-stack-field]').forEach(input => {
+    const idx = +input.dataset.idx;
+    const field = input.dataset.stackField;
+    if (SITE_DATA.stack[idx]) {
+      if (field === 'items') {
+        SITE_DATA.stack[idx].items = input.value.split(',').map(s => s.trim()).filter(Boolean);
+      } else {
+        SITE_DATA.stack[idx][field] = input.value;
+      }
+    }
+  });
+  renderAll();
+  const ok = await storageAdapter.set(SITE_DATA);
+  document.getElementById('stackMsg').textContent = ok ? '技術清單已儲存，前台也更新了。' : '存到資料庫失敗。';
 });
 
 function renderAdminLogs() {
@@ -1447,6 +1508,8 @@ document.getElementById('importBtn').addEventListener('click', async () => {
     // 2. 從 Firebase 拉取雲端資料
     const saved = await storageAdapter.get();
     if (saved && Array.isArray(saved.projects) && saved.projects.length) {
+      // 確保舊資料也有 stack 屬性以防報錯
+      if (!saved.stack) saved.stack = SITE_DATA.stack;
       SITE_DATA = saved;
       // 3. 有新資料的話更新畫面
       renderAll();
