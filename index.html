@@ -626,7 +626,7 @@
 
     <div id="adminContent" style="display:none;">
       <h3>網站管理後台</h3>
-      <p class="admin-sub">直接修改下面的內容，按「儲存」會先存在這個瀏覽器裡；要讓改動真的反映到部署出去的網站上，記得到「匯出／匯入」分頁複製程式碼貼回檔案再重新部署。</p>
+      <p class="admin-sub">直接修改下面的內容，按「儲存」會自動同步到 Firebase 資料庫。如果不放心，也可以到「匯出／匯入」分頁複製程式碼備份。</p>
 
       <div class="admin-tabs">
         <button class="admin-tab active" data-tab="basic" type="button">基本資料</button>
@@ -685,7 +685,7 @@
       </div>
 
       <div class="admin-pane" id="pane-export">
-        <p class="admin-sub" style="margin-bottom:14px;">複製下面的程式碼，貼回 portfolio.html 裡 <code>SITE_DATA</code> 的位置，存檔後重新部署，公開網站上的訪客才會看到最新內容。</p>
+        <p class="admin-sub" style="margin-bottom:14px;">由於現在已經接上 Firebase，你不再需要手動複製程式碼去更新網站。但你可以把現在的資料完整複製下來當作備份。</p>
         <textarea class="export-area" id="exportArea" readonly></textarea>
         <div class="btn-row">
           <button class="btn btn-primary" id="copyExportBtn" type="button">複製程式碼</button>
@@ -694,27 +694,42 @@
         <p class="admin-msg" id="exportMsg"></p>
         <hr style="border:none;border-top:1px solid var(--panel-edge);margin:26px 0;">
         <div class="field">
-          <label for="importArea">匯入 JSON（貼上之前匯出的內容可還原）</label>
+          <label for="importArea">匯入 JSON（貼上之前匯出的內容可覆蓋雲端資料）</label>
           <textarea id="importArea" style="min-height:100px;font-family:var(--mono);font-size:.78rem;"></textarea>
         </div>
         <div class="btn-row">
           <button class="btn" id="importBtn" type="button">匯入</button>
         </div>
         <p class="admin-msg" id="importMsg"></p>
-        <p class="admin-note">這個後台會盡量把你編輯的內容存起來 — 在 Claude 預覽中會用內建的雲端儲存；部署到你自己網域之後會改用瀏覽器的 localStorage，只存在你自己當下用的瀏覽器裡。不管哪一種，都不是「所有訪客都會即時看到」的正式資料庫。真的要讓所有訪客看到最新內容，還是要靠上面的匯出功能，把程式碼貼回檔案、重新部署。</p>
       </div>
     </div>
   </div>
 </div>
 
-<script>
+<script type="module">
+// ============ FIREBASE INIT ============
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAxObm0QEV7Zk9rMI6SbsCRXHKc765YxIk",
+  authDomain: "chiacheng-3f785.firebaseapp.com",
+  projectId: "chiacheng-3f785",
+  storageBucket: "chiacheng-3f785.firebasestorage.app",
+  messagingSenderId: "557068915414",
+  appId: "1:557068915414:web:a9ab0209daa743487def77",
+  measurementId: "G-CV97Q9XXTC"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const docRef = doc(db, "portfolio", "site_data_v1"); // 將存放在 portfolio collection 中的 site_data_v1 文件
+
 // ============ ADMIN PASSWORD ============
 // TODO: 部署到自己網域之前，記得把這裡改成你自己的密碼
 const ADMIN_PASSWORD = 'jiachang';
 
 // ============ SITE DATA ============
-// 這整個物件就是網站的「內容」。後台編輯完之後，可以到「匯出／匯入」分頁
-// 複製新的版本，貼回這裡取代掉整個 SITE_DATA，存檔後重新部署即可。
 let SITE_DATA = {
   hero: {
     name: '洪嘉成',
@@ -871,37 +886,29 @@ const STACK_GROUPS = [
 ];
 
 // ============ STORAGE ADAPTER ============
-// 優先用 Claude 預覽環境提供的 window.storage；不存在時（部署到自己網域後）
-// 改用瀏覽器的 localStorage；兩者都不行的話，至少維持記憶體內可用。
-const STORE_KEY = 'chiacheng_portfolio_data_v1';
+// 改用 Firebase Firestore 儲存
 let memoryFallback = null;
 const storageAdapter = {
   async get() {
     try {
-      if (window.storage) {
-        const r = await window.storage.get(STORE_KEY, true);
-        return r ? JSON.parse(r.value) : null;
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        return snap.data();
       }
-    } catch (e) {}
-    try {
-      const v = localStorage.getItem(STORE_KEY);
-      if (v) return JSON.parse(v);
-    } catch (e) {}
+    } catch (e) {
+      console.warn("Firebase 讀取失敗:", e);
+    }
     return memoryFallback;
   },
   async set(data) {
     memoryFallback = data;
     try {
-      if (window.storage) {
-        await window.storage.set(STORE_KEY, JSON.stringify(data), true);
-        return true;
-      }
-    } catch (e) {}
-    try {
-      localStorage.setItem(STORE_KEY, JSON.stringify(data));
+      await setDoc(docRef, data);
       return true;
-    } catch (e) {}
-    return false;
+    } catch (e) {
+      console.error("Firebase 寫入失敗:", e);
+      return false;
+    }
   }
 };
 
@@ -1227,7 +1234,7 @@ document.getElementById('saveBasicBtn').addEventListener('click', async () => {
   }).filter(o => o.url);
   renderAll();
   const ok = await storageAdapter.set(SITE_DATA);
-  document.getElementById('basicMsg').textContent = ok ? '已儲存，前台也更新了。' : '存到瀏覽器失敗，但前台已經套用新內容 — 記得用匯出功能備份。';
+  document.getElementById('basicMsg').textContent = ok ? '已儲存，前台也更新了。' : '存到資料庫失敗，但前台已經套用新內容 — 記得用匯出功能備份。';
 });
 
 function renderAdminProjects() {
@@ -1280,7 +1287,7 @@ document.getElementById('saveProjectsBtn').addEventListener('click', async () =>
   });
   renderAll();
   const ok = await storageAdapter.set(SITE_DATA);
-  document.getElementById('projectsMsg').textContent = ok ? '已儲存，前台也更新了。' : '存到瀏覽器失敗，但前台已經套用新內容 — 記得用匯出功能備份。';
+  document.getElementById('projectsMsg').textContent = ok ? '已儲存，前台也更新了。' : '存到資料庫失敗，但前台已經套用新內容 — 記得用匯出功能備份。';
 });
 
 function refreshExport() {
@@ -1314,13 +1321,18 @@ document.getElementById('importBtn').addEventListener('click', async () => {
 
 // ============ INIT ============
 (async function init() {
+  // 1. 先用原始的預設資料渲染畫面
+  renderAll();
+  
   try {
+    // 2. 從 Firebase 拉取雲端資料
     const saved = await storageAdapter.get();
     if (saved && Array.isArray(saved.projects) && saved.projects.length) {
       SITE_DATA = saved;
+      // 3. 有新資料的話更新畫面
+      renderAll();
     }
   } catch (e) {}
-  renderAll();
 })();
 </script>
 </body>
