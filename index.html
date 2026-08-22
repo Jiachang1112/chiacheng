@@ -251,7 +251,7 @@
   }
   .chip:hover{border-color:var(--lamp);color:var(--ink);transform:translateY(-2px);}
 
-  /* ============ WORK (placeholder filled later) ============ */
+  /* ============ WORK ============ */
   #work{padding:90px 0 40px;border-top:1px solid rgba(255,255,255,.06);}
   .work-head{margin-bottom:40px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:14px;}
   .work-head h2{
@@ -366,6 +366,38 @@
   }
   .log-link:hover{background:var(--lamp);color:var(--night);}
   .log-link.muted{color:var(--ink-faint);border-color:var(--panel-edge);}
+
+  /* ============ DEVLOG ============ */
+  #devlog { padding: 90px 0; border-top: 1px solid rgba(255,255,255,.06); }
+  .devlog-grid { display: grid; grid-template-columns: 200px 1fr; gap: 48px; }
+  .devlog-label {
+    font-family: var(--disp); font-style: italic; font-size: 1.6rem;
+    color: var(--lamp-soft); align-self: start; position: sticky; top: 110px;
+  }
+  .devlog-feed {
+    border-left: 2px solid var(--hair); padding-left: 26px;
+    display: flex; flex-direction: column; gap: 32px;
+  }
+  .devlog-item { position: relative; }
+  .devlog-item::before {
+    content: ''; position: absolute; left: -31px; top: 5px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--night); border: 2px solid var(--lamp);
+    box-shadow: 0 0 8px var(--lamp-dim);
+  }
+  .devlog-date {
+    font-family: var(--mono); font-size: .8rem;
+    color: var(--lamp-soft); margin-bottom: 8px; letter-spacing: .05em;
+  }
+  .devlog-content {
+    color: var(--ink); font-size: .98rem; line-height: 1.7;
+    background: var(--panel); border: 1px solid var(--panel-edge);
+    padding: 16px 20px; border-radius: var(--radius-lg);
+    transition: border-color .25s ease;
+  }
+  .devlog-content:hover { border-color: var(--hair); }
+  .devlog-content p { margin: 0 0 12px; }
+  .devlog-content p:last-child { margin: 0; }
 
   /* ============ CONTACT ============ */
   #contact{padding:100px 0;border-top:1px solid rgba(255,255,255,.06);}
@@ -491,8 +523,8 @@
     .nav-links{gap:16px;}
     .nav-links a{font-size:.7rem;}
     #hero{padding:110px 0 60px;}
-    .about-grid,.contact-grid{grid-template-columns:1fr;gap:18px;}
-    .about-label{position:static;}
+    .about-grid,.contact-grid,.devlog-grid{grid-template-columns:1fr;gap:18px;}
+    .about-label,.devlog-label{position:static;}
     .stack-groups{gap:28px;}
     .work-note{text-align:left;}
     .hero-glow{width:600px;height:600px;}
@@ -518,6 +550,7 @@
       <li><a href="#about">關於</a></li>
       <li><a href="#stack">技術</a></li>
       <li><a href="#work">作品</a></li>
+      <li><a href="#devlog">日誌</a></li>
       <li><a href="#contact">聯絡</a></li>
     </ul>
   </nav>
@@ -589,6 +622,13 @@
     </div>
   </section>
 
+  <section id="devlog">
+    <div class="wrap devlog-grid">
+      <div class="devlog-label reveal">開發者日誌</div>
+      <div class="devlog-feed reveal" id="devlogList"></div>
+    </div>
+  </section>
+
   <section id="contact">
     <div class="wrap contact-grid">
       <div class="contact-label reveal">聯絡</div>
@@ -631,6 +671,7 @@
       <div class="admin-tabs">
         <button class="admin-tab active" data-tab="basic" type="button">基本資料</button>
         <button class="admin-tab" data-tab="projects" type="button">專案</button>
+        <button class="admin-tab" data-tab="logs" type="button">開發日誌</button>
         <button class="admin-tab" data-tab="export" type="button">匯出／匯入</button>
       </div>
 
@@ -682,6 +723,15 @@
           <button class="btn btn-primary" id="saveProjectsBtn" type="button">儲存所有專案</button>
         </div>
         <p class="admin-msg" id="projectsMsg"></p>
+      </div>
+
+      <div class="admin-pane" id="pane-logs">
+        <div id="adminLogsList"></div>
+        <div class="btn-row">
+          <button class="btn" id="addLogBtn" type="button">＋ 新增動態</button>
+          <button class="btn btn-primary" id="saveLogsBtn" type="button">儲存日誌</button>
+        </div>
+        <p class="admin-msg" id="logsMsg"></p>
       </div>
 
       <div class="admin-pane" id="pane-export">
@@ -745,6 +795,12 @@ let SITE_DATA = {
     github: 'https://github.com/Jiachang1112',
     other: []
   },
+  logs: [
+    {
+      date: '2026-08-22',
+      content: '網站開發者日誌正式上線囉！可以在這裡記錄一些隨筆或是開發進度更新。'
+    }
+  ],
   projects: [
     {
       category: 'LINE 機器人・自動化',
@@ -1113,6 +1169,23 @@ document.getElementById('workSort').addEventListener('change', (e) => {
   renderWork();
 });
 
+function renderDevLog() {
+  const feed = document.getElementById('devlogList');
+  if (!SITE_DATA.logs || SITE_DATA.logs.length === 0) {
+    feed.innerHTML = '<div style="color:var(--ink-faint);font-family:var(--mono);font-size:.85rem;">目前還沒有發布日誌。</div>';
+    return;
+  }
+  const sortedLogs = [...SITE_DATA.logs].sort((a, b) => new Date(b.date) - new Date(a.date));
+  feed.innerHTML = sortedLogs.map(log => `
+    <div class="devlog-item">
+      <div class="devlog-date">${escapeHtml(log.date)}</div>
+      <div class="devlog-content">
+        ${(log.content || '').split(/\n\s*\n/).map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
 function renderContact() {
   const el = document.getElementById('contactLinks');
   let html = '';
@@ -1134,6 +1207,7 @@ function renderAll() {
   renderStack();
   renderWorkToolbar();
   renderWork();
+  renderDevLog();
   renderContact();
 }
 
@@ -1218,6 +1292,7 @@ function loadFormFromData() {
   document.getElementById('in-contactGithub').value = SITE_DATA.contact.github || '';
   document.getElementById('in-contactOther').value = (SITE_DATA.contact.other || []).map(o => `${o.label}｜${o.url}`).join('\n');
   renderAdminProjects();
+  renderAdminLogs();
 }
 
 document.getElementById('saveBasicBtn').addEventListener('click', async () => {
@@ -1288,6 +1363,50 @@ document.getElementById('saveProjectsBtn').addEventListener('click', async () =>
   renderAll();
   const ok = await storageAdapter.set(SITE_DATA);
   document.getElementById('projectsMsg').textContent = ok ? '已儲存，前台也更新了。' : '存到資料庫失敗，但前台已經套用新內容 — 記得用匯出功能備份。';
+});
+
+function renderAdminLogs() {
+  const wrap = document.getElementById('adminLogsList');
+  if (!SITE_DATA.logs) SITE_DATA.logs = [];
+  wrap.innerHTML = SITE_DATA.logs.map((log, i) => `
+    <div class="admin-project-card" data-idx="${i}">
+      <div class="admin-project-head">
+        <span>日誌 #${i + 1}</span>
+        <button type="button" class="btn btn-danger" data-action="delete-log" data-idx="${i}">刪除</button>
+      </div>
+      <div class="field"><label>日期 (YYYY-MM-DD)</label><input type="text" data-log-field="date" data-idx="${i}" value="${escapeAttr(log.date)}"></div>
+      <div class="field"><label>內容 (支援換行)</label><textarea data-log-field="content" data-idx="${i}" style="min-height:100px;">${escapeHtml(log.content)}</textarea></div>
+    </div>
+  `).join('');
+  
+  wrap.querySelectorAll('[data-action="delete-log"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = +btn.dataset.idx;
+      if (confirm('確定要刪除這篇日誌嗎？')) {
+        SITE_DATA.logs.splice(idx, 1);
+        renderAdminLogs();
+      }
+    });
+  });
+}
+
+document.getElementById('addLogBtn').addEventListener('click', () => {
+  if (!SITE_DATA.logs) SITE_DATA.logs = [];
+  const today = new Date().toISOString().split('T')[0];
+  SITE_DATA.logs.unshift({ date: today, content: '' });
+  renderAdminLogs();
+});
+
+document.getElementById('saveLogsBtn').addEventListener('click', async () => {
+  if (!SITE_DATA.logs) SITE_DATA.logs = [];
+  document.querySelectorAll('#adminLogsList [data-log-field]').forEach(input => {
+    const idx = +input.dataset.idx;
+    const field = input.dataset.logField;
+    if (SITE_DATA.logs[idx]) SITE_DATA.logs[idx][field] = input.value;
+  });
+  renderAll();
+  const ok = await storageAdapter.set(SITE_DATA);
+  document.getElementById('logsMsg').textContent = ok ? '日誌已儲存，前台也更新了。' : '存到資料庫失敗，但前台已經套用新內容 — 記得用匯出功能備份。';
 });
 
 function refreshExport() {
