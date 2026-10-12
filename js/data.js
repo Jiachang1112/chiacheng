@@ -375,6 +375,7 @@ function normSettings(s) {
   });
   const w = isObj(s.work) ? s.work : {};
   const cf = isObj(s.contactForm) ? s.contactForm : {};
+  const h = isObj(s.hero) ? s.hero : {};
   return {
     siteTitle: str(s.siteTitle).trim(),
     metaDescription: str(s.metaDescription).trim(),
@@ -387,6 +388,7 @@ function normSettings(s) {
       expandFirst: w.expandFirst === true,
     },
     contactForm: { enabled: cf.enabled === true, notice: str(cf.notice).trim() },
+    hero: { showCard: h.showCard !== false },
   };
 }
 

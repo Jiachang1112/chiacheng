@@ -43,6 +43,12 @@ export default {
     </section>
 
     <section class="block">
+      ${blockHead('首頁')}
+      <label class="check"><input type="checkbox" data-path="settings.hero.showCard"${d.settings.hero.showCard ? ' checked' : ''}> 在首頁右側顯示「正在線上運作」卡片</label>
+      <p class="hint">卡片會列出狀態是「上線中」或「維護中」的專案，精選和有網站可看的排在前面。</p>
+    </section>
+
+    <section class="block">
       ${blockHead('作品清單')}
       <div class="form-grid">
         ${fld('預設排序', `<select data-path="settings.work.defaultSort">
