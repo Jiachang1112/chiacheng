@@ -141,7 +141,7 @@ export default {
     ui.sel.forEach((id) => { if (!ids.has(id)) ui.sel.delete(id); });
 
     root.innerHTML = `
-    <div class="toolbar">
+    <div class="toolbar proj-tools">
       <input type="search" id="pq" placeholder="搜尋名稱、介紹、技術" value="${esc(ui.q)}" aria-label="搜尋專案">
       <select id="pcat" aria-label="分類">
         <option value="all">全部分類</option>
