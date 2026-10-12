@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chiacheng1112.com/sitemap.xml

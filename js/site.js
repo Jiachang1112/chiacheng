@@ -29,35 +29,64 @@ function hasContent(key) {
 }
 
 // ============ 各區塊 ============
-function heroHtml() {
-  const d = DATA;
-  const n = d.projects.length;
-  const up = d.projects.filter((p) => p.status === 'live' || p.status === 'maintain').length;
-  const t = countTech(d.projects);
-  const facts = n
-    ? `共 <b>${n}</b> 個專案${up ? `，其中 <b>${up}</b> 個上線或維護中` : ''}${t ? `；用過 <b>${t}</b> 項技術` : ''}。`
-    : '';
-  const photo = safeImg(d.hero.avatar);
+// 每個區塊都是兩欄：左邊是標題（桌機會跟著捲動），右邊是內容
+function sec(key, note, body) {
   return `
-  <section class="hero${photo ? ' has-photo' : ''}" id="hero">
+  <section class="sec" id="${key}"><div class="wrap sec-grid">
+    <div class="sec-head ${RV}"><h2><span>${SECTION_LABELS[key]}</span></h2>${note ? `<p class="sec-note">${note}</p>` : ''}</div>
+    <div class="sec-body">${body}</div>
+  </div></section>`;
+}
+
+// 首頁右側「正在線上運作」：精選的排前面，其餘照後台的順序
+function liveProjects() {
+  const live = DATA.projects.filter((p) => p.status === 'live' || p.status === 'maintain');
+  return { total: live.length, list: live.slice().sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)).slice(0, 6) };
+}
+
+function noteCardHtml(hasWork) {
+  if (!DATA.settings.hero.showCard) return '';
+  const { total, list } = liveProjects();
+  if (!list.length) return '';
+  const t = countTech(DATA.projects);
+  return `
+  <aside class="notecard ${RV}" style="--i:2" aria-labelledby="nc-t">
+    <span class="tape" aria-hidden="true"></span>
+    <div class="nc-head"><h2 id="nc-t">正在線上運作</h2><span class="nc-count">${total}</span></div>
+    <ul class="nc-list">
+      ${list.map((p) => `
+      <li><a href="#work" data-open="${esc(p.id)}"><i class="dot ${esc(p.status)}" aria-hidden="true"></i><span class="nc-txt"><span class="nc-name">${esc(p.name)}</span>${p.tagline ? `<span class="nc-tag">${esc(p.tagline)}</span>` : ''}</span></a></li>`).join('')}
+    </ul>
+    <p class="nc-foot">共 ${DATA.projects.length} 個專案${t ? `，用過 ${t} 項技術` : ''}。${hasWork ? ' <a href="#work">看全部</a>' : ''}</p>
+  </aside>`;
+}
+
+function heroHtml(secs) {
+  const d = DATA;
+  const photo = safeImg(d.hero.avatar);
+  const has = (k) => secs.some((s) => s.key === k);
+  const ctas = [];
+  if (has('work')) ctas.push('<a class="btn" href="#work">看作品</a>');
+  if (has('contact')) ctas.push('<a class="btn-link" href="#contact">聯絡我</a>');
+  return `
+  <section class="hero" id="hero">
     <div class="wrap hero-grid">
-      <div>
+      <div class="hero-main">
         <h1 class="hero-name ${RV}" style="--u:${nameUnits(d.hero.name).toFixed(2)}">${esc(d.hero.name)}</h1>
         ${d.hero.tagline ? `<p class="hero-tagline ${RV}" style="--i:1">${esc(d.hero.tagline)}</p>` : ''}
         ${d.hero.intro ? `<p class="hero-intro ${RV}" style="--i:2">${esc(d.hero.intro).replace(/\n/g, '<br>')}</p>` : ''}
-        ${facts ? `<p class="hero-facts ${RV}" style="--i:3">${facts}</p>` : ''}
+        ${ctas.length ? `<div class="hero-cta ${RV}" style="--i:3">${ctas.join('')}</div>` : ''}
       </div>
-      ${photo ? `<figure class="hero-photo ${RV}" style="--i:2"><img src="${esc(photo)}" alt="${esc(d.hero.name)}"></figure>` : ''}
+      <div class="hero-side">
+        ${photo ? `<figure class="hero-photo ${RV}" style="--i:1"><span class="tape" aria-hidden="true"></span><img src="${esc(photo)}" alt="${esc(d.hero.name)}"></figure>` : ''}
+        ${noteCardHtml(has('work'))}
+      </div>
     </div>
   </section>`;
 }
 
 function aboutHtml() {
-  return `
-  <section class="sec" id="about"><div class="wrap">
-    <div class="sec-head ${RV}"><h2>${SECTION_LABELS.about}</h2></div>
-    <div class="about-body md ${RV}">${mdLite(DATA.about.body)}</div>
-  </div></section>`;
+  return sec('about', '', `<div class="about-body md ${RV}">${mdLite(DATA.about.body)}</div>`);
 }
 
 function sortedProjects(list) {
@@ -85,31 +114,34 @@ function rowHtml(p, i) {
   const gh = safeUrl(p.links.github);
   const demo = safeUrl(p.links.demo);
   const links = [];
-  if (gh) links.push(`<a href="${esc(gh)}" target="_blank" rel="noopener">GitHub</a>`);
-  if (demo) links.push(`<a href="${esc(demo)}" target="_blank" rel="noopener">查看網站</a>`);
-  if (!links.length) links.push('<span class="d-none">目前沒有公開連結</span>');
+  if (demo) links.push(`<a href="${esc(demo)}" target="_blank" rel="noopener">查看網站<span aria-hidden="true"> ↗</span></a>`);
+  if (gh) links.push(`<a href="${esc(gh)}" target="_blank" rel="noopener">GitHub<span aria-hidden="true"> ↗</span></a>`);
   const cover = safeImg(p.cover);
-  const state = [STATUS[p.status], p.year].filter(Boolean).join('　');
+  const state = [STATUS[p.status], p.year].filter(Boolean).join('・');
+  const did = 'd-' + p.id;
   return `
   <li class="row ${RV}" style="--i:${i < 6 ? i : 0}" data-id="${esc(p.id)}">
-    <button type="button" class="row-head" aria-expanded="${open}" aria-controls="d-${i}">
+    <button type="button" class="row-head" aria-expanded="${open}" aria-controls="${esc(did)}">
+      <i class="dot ${esc(p.status)}" aria-hidden="true"></i>
       <span class="r-main">
-        <span class="r-name">${esc(p.name)}</span>
+        <span class="r-name">${esc(p.name)}${p.featured ? '<span class="pin">精選</span>' : ''}</span>
         ${p.tagline ? `<span class="r-tag">${esc(p.tagline)}</span>` : ''}
       </span>
       <span class="r-meta">
         <span class="r-cat">${esc(p.category)}</span>
-        <span class="r-state">${esc(state)}${p.featured ? '　精選' : ''}</span>
+        <span class="r-state">${esc(state)}</span>
       </span>
       <span class="r-icon" aria-hidden="true"></span>
     </button>
-    <div class="row-detail${open ? ' open' : ''}" id="d-${i}">
-      <div class="row-detail-in">
-        ${cover ? `<img class="d-cover" src="${esc(cover)}" alt="${esc(p.name)} 的畫面" loading="lazy">` : ''}
-        ${p.desc ? `<p class="d-desc">${esc(p.desc)}</p>` : ''}
-        ${p.tech.length ? `<p class="d-tech"><b>使用</b>${p.tech.map((i) => `<span class="it">${esc(i)}</span>`).join('、')}</p>` : ''}
-        <div class="d-links">${links.join('')}</div>
-      </div>
+    <div class="row-detail${open ? ' open' : ''}" id="${esc(did)}" role="region" aria-label="${esc(p.name)} 的介紹">
+      <div class="row-clip"><div class="row-detail-in${links.length ? '' : ' solo'}">
+        <div class="d-main">
+          ${cover ? `<img class="d-cover" src="${esc(cover)}" alt="${esc(p.name)} 的畫面" loading="lazy">` : ''}
+          ${p.desc ? `<p class="d-desc">${esc(p.desc)}</p>` : '<p class="d-desc d-none">還沒有詳細介紹。</p>'}
+          ${p.tech.length ? `<ul class="d-tech" aria-label="使用的技術">${p.tech.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+        </div>
+        ${links.length ? `<div class="d-side">${links.join('')}</div>` : ''}
+      </div></div>
     </div>
   </li>`;
 }
@@ -139,10 +171,6 @@ function workHtml() {
     ? `
     <div class="tools ${RV}">
       <label class="search"><span class="sr">搜尋專案</span><input type="search" id="q" value="${esc(view.q)}" placeholder="搜尋專案或技術" autocomplete="off"></label>
-      <div class="filters" role="group" aria-label="依分類篩選">
-        <button type="button" class="flt" data-cat="all" aria-pressed="${view.cat === 'all'}">全部<small>${DATA.projects.length}</small></button>
-        ${cats.map((c) => `<button type="button" class="flt" data-cat="${esc(c.name)}" aria-pressed="${view.cat === c.name}">${esc(c.name)}<small>${c.n}</small></button>`).join('')}
-      </div>
       <label class="sort"><span class="sr">排序方式</span>
         <select id="sort">
           <option value="default"${view.sort === 'default' ? ' selected' : ''}>預設排序</option>
@@ -150,26 +178,22 @@ function workHtml() {
           <option value="category"${view.sort === 'category' ? ' selected' : ''}>分類排序</option>
         </select>
       </label>
+      <div class="filters" role="group" aria-label="依分類篩選">
+        <button type="button" class="flt" data-cat="all" aria-pressed="${view.cat === 'all'}">全部<small>${DATA.projects.length}</small></button>
+        ${cats.map((c) => `<button type="button" class="flt" data-cat="${esc(c.name)}" aria-pressed="${view.cat === c.name}">${esc(c.name)}<small>${c.n}</small></button>`).join('')}
+      </div>
     </div>`
     : '';
 
-  return `
-  <section class="sec" id="work"><div class="wrap">
-    <div class="sec-head ${RV}"><h2>${SECTION_LABELS.work}</h2><span class="sec-note">點一下專案，展開詳細介紹</span></div>
-    ${tools}
-    <ol class="index" id="workList">${workListHtml()}</ol>
-  </div></section>`;
+  return sec('work', `${DATA.projects.length} 個專案。點一下展開介紹。`, `${tools}<ol class="index" id="workList">${workListHtml()}</ol>`);
 }
 
 function stackHtml() {
   const groups = DATA.stack.filter((g) => g.items.length);
-  return `
-  <section class="sec" id="stack"><div class="wrap">
-    <div class="sec-head ${RV}"><h2>${SECTION_LABELS.stack}</h2><span class="sec-note">用過、串過、部署過的工具</span></div>
-    <div class="stack">
-      ${groups.map((g, i) => `<div class="${RV}" style="--i:${i}"><h3>${esc(g.title)}</h3><p>${g.items.map((i) => `<span class="it">${esc(i)}</span>`).join('、')}</p></div>`).join('')}
-    </div>
-  </div></section>`;
+  return sec('stack', '用過、串過、部署過的工具。', `
+    <dl class="stack">
+      ${groups.map((g, i) => `<div class="${RV}" style="--i:${i}"><dt>${esc(g.title)}</dt><dd>${g.items.map((t) => `<span class="it">${esc(t)}</span>`).join('、')}</dd></div>`).join('')}
+    </dl>`);
 }
 
 function devlogHtml() {
@@ -177,9 +201,7 @@ function devlogHtml() {
     .filter((l) => l.content.trim() || l.title.trim())
     .slice()
     .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || String(b.date).localeCompare(String(a.date)));
-  return `
-  <section class="sec" id="devlog"><div class="wrap">
-    <div class="sec-head ${RV}"><h2>${SECTION_LABELS.devlog}</h2></div>
+  return sec('devlog', `${logs.length} 篇`, `
     <div class="logs">
       ${logs.map((l, i) => `
       <article class="log ${RV}" style="--i:${i < 3 ? i : 0}">
@@ -189,27 +211,23 @@ function devlogHtml() {
           <div class="log-body md">${mdLite(l.content)}</div>
         </div>
       </article>`).join('')}
-    </div>
-  </div></section>`;
+    </div>`);
 }
 
 function linksHtml() {
   const list = DATA.links.filter((l) => safeUrl(l.url));
-  return `
-  <section class="sec" id="links"><div class="wrap">
-    <div class="sec-head ${RV}"><h2>${SECTION_LABELS.links}</h2></div>
+  return sec('links', '', `
     <ul class="linklist">
       ${list.map((l, i) => `
       <li class="${RV}" style="--i:${i < 5 ? i : 0}"><a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">
         <span class="ll-title">${esc(l.title || host(l.url))}</span>
         <span class="ll-note">${esc(l.note)}</span>
-        <span class="ll-host">${esc(host(l.url))}</span>
+        <span class="ll-host">${esc(host(l.url))}<span aria-hidden="true"> ↗</span></span>
       </a></li>`).join('')}
-    </ul>
-  </div></section>`;
+    </ul>`);
 }
 
-function contactHtml() {
+function contactRows() {
   const c = DATA.contact;
   const rows = [];
   if (isEmail(c.email)) rows.push(['Email', `mailto:${c.email}`, c.email, false]);
@@ -219,6 +237,11 @@ function contactHtml() {
     const u = safeUrl(o.url);
     if (u) rows.push([o.label || host(u), u, u.replace(/^https?:\/\//, ''), true]);
   });
+  return rows;
+}
+
+function contactHtml() {
+  const rows = contactRows();
   const cf = DATA.settings.contactForm;
   const form = cf.enabled
     ? `
@@ -233,20 +256,35 @@ function contactHtml() {
       <div class="form-msg" role="status"></div>
     </form>`
     : '';
-  return `
-  <section class="sec" id="contact"><div class="wrap">
-    <div class="sec-head ${RV}"><h2>${SECTION_LABELS.contact}</h2></div>
+  return sec('contact', '', `
     ${rows.length ? `<div class="contacts">
       ${rows.map(([label, href, val, ext], i) => `
       <a class="c-row ${RV}" style="--i:${i}" href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ''}>
         <span class="c-label">${esc(label)}</span><span class="c-val">${esc(val)}</span>
       </a>`).join('')}
     </div>` : ''}
-    ${form}
-  </div></section>`;
+    ${form}`);
 }
 
 const SECTIONS = { about: aboutHtml, work: workHtml, stack: stackHtml, devlog: devlogHtml, links: linksHtml, contact: contactHtml };
+
+function footHtml(secs) {
+  const d = DATA;
+  const nav = secs.map((s) => `<a href="#${s.key}">${SECTION_LABELS[s.key]}</a>`).join('');
+  const rows = contactRows().slice(0, 3);
+  return `
+  <footer class="foot"><div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-id"><strong>${esc(d.hero.name)}</strong>${d.hero.tagline ? `<p>${esc(d.hero.tagline)}</p>` : ''}</div>
+      ${nav ? `<nav class="foot-nav" aria-label="頁尾選單">${nav}</nav>` : ''}
+      ${rows.length ? `<div class="foot-contact">${rows.map(([label, href, val, ext]) => `<a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ''}>${esc(label)}</a>`).join('')}</div>` : ''}
+    </div>
+    <div class="foot-base">
+      <span>© ${new Date().getFullYear()} ${esc(d.hero.name)}${d.settings.footerText ? '　' + esc(d.settings.footerText) : ''}</span>
+      <span><a href="#top">回到頂端 <span aria-hidden="true">↑</span></a><a href="admin.html">管理</a></span>
+    </div>
+  </div></footer>`;
+}
 
 function build() {
   const d = DATA;
@@ -259,27 +297,74 @@ function build() {
     <nav class="nav" aria-label="頁面區塊">${nav}</nav>
   </div></header>
   <main id="main">
-    ${heroHtml()}
+    ${heroHtml(secs)}
     ${secs.map((s) => SECTIONS[s.key]()).join('')}
   </main>
-  <footer class="foot"><div class="wrap foot-in">
-    <span>© ${new Date().getFullYear()} ${esc(d.hero.name)}${d.settings.footerText ? '　' + esc(d.settings.footerText) : ''}</span>
-    <span><a href="#top">回到頂端</a>　<a href="admin.html">管理</a></span>
-  </div></footer>
+  ${footHtml(secs)}
   ${MODE === 'preview' ? '<div class="pv-bar"><span>預覽草稿，尚未發布到網站。</span><a href="index.html">離開預覽</a></div>' : ''}`;
 }
 
 // ============ 畫面更新 ============
+function setMeta(sel, attr, value) {
+  const el = $(sel);
+  if (el && value) el.setAttribute(attr, value);
+}
+
 function applyMeta() {
   const s = DATA.settings;
   const root = document.documentElement;
   const vars = themeVars(s.theme);
   Object.keys(vars).forEach((k) => root.style.setProperty(k, vars[k]));
-  document.title = s.siteTitle || `${DATA.hero.name} · 作品集`;
-  const meta = $('meta[name="description"]');
-  if (meta && s.metaDescription) meta.setAttribute('content', s.metaDescription);
-  const tc = $('meta[name="theme-color"]');
-  if (tc) tc.setAttribute('content', vars['--paper']);
+  const title = s.siteTitle || `${DATA.hero.name} · 作品集`;
+  const desc = s.metaDescription || [DATA.hero.tagline, DATA.hero.intro].filter(Boolean).join(' ').slice(0, 120);
+  document.title = title;
+  setMeta('meta[name="description"]', 'content', desc);
+  setMeta('meta[property="og:title"]', 'content', title);
+  setMeta('meta[property="og:description"]', 'content', desc);
+  setMeta('meta[name="twitter:title"]', 'content', title);
+  setMeta('meta[name="twitter:description"]', 'content', desc);
+  setMeta('meta[name="theme-color"]', 'content', vars['--paper']);
+  const ld = $('#ld');
+  if (ld && MODE === 'live') {
+    const same = [safeUrl(DATA.contact.github), ...DATA.contact.other.map((o) => safeUrl(o.url))].filter(Boolean);
+    ld.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: DATA.hero.name,
+      url: 'https://chiacheng1112.com/',
+      description: desc,
+      ...(same.length ? { sameAs: same } : {}),
+    });
+  }
+}
+
+// 捲到哪個區塊，頂欄的對應項目就標上螢光筆
+let spy = null;
+function observeNav() {
+  if (spy) spy.disconnect();
+  const links = [...app.querySelectorAll('.nav a')];
+  if (!links.length || !('IntersectionObserver' in window)) return;
+  const byId = new Map(links.map((a) => [a.getAttribute('href').slice(1), a]));
+  spy = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        links.forEach((a) => a.removeAttribute('aria-current'));
+        const a = byId.get(en.target.id);
+        if (a) {
+          a.setAttribute('aria-current', 'true');
+          // 手機上選單可以左右滑，讓目前的項目留在中間
+          const nav = a.parentElement;
+          if (nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: a.offsetLeft - (nav.clientWidth - a.offsetWidth) / 2, behavior: REDUCE ? 'auto' : 'smooth' });
+        }
+      });
+    },
+    { rootMargin: '-45% 0px -50% 0px' }
+  );
+  byId.forEach((a, id) => {
+    const el = document.getElementById(id);
+    if (el) spy.observe(el);
+  });
 }
 
 let io = null;
@@ -318,6 +403,7 @@ function paint(data, { instant = false } = {}) {
   if (keep) app.style.minHeight = keep + 'px';
   app.innerHTML = build();
   observeReveals();
+  observeNav();
   app.style.minHeight = '';
   if (y) window.scrollTo({ top: y, behavior: 'instant' });
   RV = 'reveal';
@@ -333,7 +419,25 @@ function updateWorkList() {
 }
 
 // ============ 互動 ============
+function openProject(id) {
+  view.q = '';
+  view.cat = 'all';
+  view.open.add(id);
+  const q = $('#q');
+  if (q) q.value = '';
+  app.querySelectorAll('.flt').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cat === 'all')));
+  updateWorkList();
+  const li = [...app.querySelectorAll('.row')].find((r) => r.dataset.id === id);
+  if (li) li.scrollIntoView({ block: 'center', behavior: REDUCE ? 'auto' : 'smooth' });
+}
+
 app.addEventListener('click', (e) => {
+  const jump = e.target.closest('[data-open]');
+  if (jump && $('#workList')) {
+    e.preventDefault();
+    openProject(jump.dataset.open);
+    return;
+  }
   const head = e.target.closest('.row-head');
   if (head) {
     const li = head.closest('.row');
