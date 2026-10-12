@@ -10,6 +10,14 @@ const params = new URLSearchParams(location.search);
 const MODE = params.has('embed') ? 'embed' : params.has('preview') ? 'preview' : 'live';
 const REDUCE = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const app = document.getElementById('app');
+// 裝置偵測在 <head> 的 js/device.js 完成；萬一那支檔案沒載入，退回只看視窗寬度
+const Dev = window.Device || {
+  current: () => (innerWidth <= 720 ? 'mobile' : 'desktop'),
+  mode: () => 'auto',
+  set() {},
+  onChange() {},
+};
+const isMobile = () => Dev.current() === 'mobile';
 
 let DATA = null;
 let RV = 'reveal'; // 產生 HTML 時使用；資料更新時改成 'reveal in'，避免已經看到的內容再淡入一次
@@ -185,7 +193,7 @@ function workHtml() {
     </div>`
     : '';
 
-  return sec('work', `${DATA.projects.length} 個專案。點一下展開介紹。`, `${tools}<ol class="index" id="workList">${workListHtml()}</ol>`);
+  return sec('work', `${DATA.projects.length} 個專案。點一下看介紹。`, `${tools}<ol class="index" id="workList">${workListHtml()}</ol>`);
 }
 
 function stackHtml() {
@@ -268,6 +276,13 @@ function contactHtml() {
 
 const SECTIONS = { about: aboutHtml, work: workHtml, stack: stackHtml, devlog: devlogHtml, links: linksHtml, contact: contactHtml };
 
+// 手動切換版面：現在是手機版就提供「電腦版」，反之亦然；手動選過之後多一個「自動偵測」
+function switchHtml() {
+  if (MODE === 'embed') return '';
+  const mob = isMobile();
+  return `<button type="button" data-switch="${mob ? 'desktop' : 'mobile'}">${mob ? '電腦版' : '手機版'}</button>${Dev.mode() !== 'auto' ? '<button type="button" data-switch="auto">自動偵測</button>' : ''}`;
+}
+
 function footHtml(secs) {
   const d = DATA;
   const nav = secs.map((s) => `<a href="#${s.key}">${SECTION_LABELS[s.key]}</a>`).join('');
@@ -281,9 +296,22 @@ function footHtml(secs) {
     </div>
     <div class="foot-base">
       <span>© ${new Date().getFullYear()} ${esc(d.hero.name)}${d.settings.footerText ? '　' + esc(d.settings.footerText) : ''}</span>
-      <span><a href="#top">回到頂端 <span aria-hidden="true">↑</span></a><a href="admin.html">管理</a></span>
+      <span><span class="foot-sw" data-sw>${switchHtml()}</span><a href="#top">回到頂端 <span aria-hidden="true">↑</span></a><a href="admin.html">管理</a></span>
     </div>
   </div></footer>`;
+}
+
+// 手機版的底部導覽：首頁＋最多兩個常用區塊＋「目錄」
+const DOCK_PRIORITY = ['work', 'contact', 'about', 'devlog', 'links', 'stack'];
+function dockHtml(secs) {
+  const keys = DOCK_PRIORITY.filter((k) => secs.some((s) => s.key === k)).slice(0, 2);
+  const order = secs.map((s) => s.key).filter((k) => keys.includes(k));
+  return `
+  <nav class="dock" aria-label="快速切換">
+    <a href="#hero" data-dock="hero"><span>首頁</span></a>
+    ${order.map((k) => `<a href="#${k}" data-dock="${k}"><span>${SECTION_LABELS[k]}</span></a>`).join('')}
+    <button type="button" data-menu aria-haspopup="dialog"><span>目錄</span></button>
+  </nav>`;
 }
 
 function build() {
@@ -295,12 +323,14 @@ function build() {
   <header class="top" id="top"><div class="top-in">
     <a class="brand" href="#hero">${esc(d.hero.name)}</a>
     <nav class="nav" aria-label="頁面區塊">${nav}</nav>
+    <span class="top-now" id="topNow" aria-hidden="true"></span>
   </div></header>
   <main id="main">
     ${heroHtml(secs)}
     ${secs.map((s) => SECTIONS[s.key]()).join('')}
   </main>
   ${footHtml(secs)}
+  ${dockHtml(secs)}
   ${MODE === 'preview' ? '<div class="pv-bar"><span>預覽草稿，尚未發布到網站。</span><a href="index.html">離開預覽</a></div>' : ''}`;
 }
 
@@ -338,34 +368,61 @@ function applyMeta() {
   }
 }
 
-// 捲到哪個區塊，頂欄的對應項目就標上螢光筆
+// 捲到哪個區塊，頂欄（電腦）／底部導覽與頂欄小標（手機）就標出對應項目
 let spy = null;
+let currentKey = 'hero';
+function markActive(key) {
+  currentKey = key;
+  app.querySelectorAll('.nav a').forEach((a) => {
+    const on = a.getAttribute('href') === '#' + key;
+    if (on) {
+      a.setAttribute('aria-current', 'true');
+      // 選單比螢幕寬時可以左右滑，讓目前的項目留在中間
+      const nav = a.parentElement;
+      if (nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: a.offsetLeft - (nav.clientWidth - a.offsetWidth) / 2, behavior: REDUCE ? 'auto' : 'smooth' });
+    } else a.removeAttribute('aria-current');
+  });
+  app.querySelectorAll('[data-dock]').forEach((a) => {
+    if (a.dataset.dock === key) a.setAttribute('aria-current', 'true');
+    else a.removeAttribute('aria-current');
+  });
+  const now = $('#topNow');
+  if (now) now.textContent = key === 'hero' ? '' : SECTION_LABELS[key] || '';
+}
+
 function observeNav() {
   if (spy) spy.disconnect();
-  const links = [...app.querySelectorAll('.nav a')];
-  if (!links.length || !('IntersectionObserver' in window)) return;
-  const byId = new Map(links.map((a) => [a.getAttribute('href').slice(1), a]));
+  if (!('IntersectionObserver' in window)) return;
+  const ids = ['hero', ...[...app.querySelectorAll('.nav a')].map((a) => a.getAttribute('href').slice(1))];
   spy = new IntersectionObserver(
     (entries) => {
       entries.forEach((en) => {
-        if (!en.isIntersecting) return;
-        links.forEach((a) => a.removeAttribute('aria-current'));
-        const a = byId.get(en.target.id);
-        if (a) {
-          a.setAttribute('aria-current', 'true');
-          // 手機上選單可以左右滑，讓目前的項目留在中間
-          const nav = a.parentElement;
-          if (nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: a.offsetLeft - (nav.clientWidth - a.offsetWidth) / 2, behavior: REDUCE ? 'auto' : 'smooth' });
-        }
+        if (en.isIntersecting) markActive(en.target.id);
       });
     },
     { rootMargin: '-45% 0px -50% 0px' }
   );
-  byId.forEach((a, id) => {
+  ids.forEach((id) => {
     const el = document.getElementById(id);
     if (el) spy.observe(el);
   });
+  markActive(currentKey);
 }
+
+// 手機頂欄底下的閱讀進度線
+let ticking = false;
+function onScroll() {
+  if (ticking || !isMobile()) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    ticking = false;
+    const top = $('#top');
+    if (!top) return;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    top.style.setProperty('--p', max > 0 ? Math.min(1, Math.max(0, scrollY / max)).toFixed(3) : '0');
+  });
+}
+window.addEventListener('scroll', onScroll, { passive: true });
 
 let io = null;
 function observeReveals() {
@@ -404,6 +461,8 @@ function paint(data, { instant = false } = {}) {
   app.innerHTML = build();
   observeReveals();
   observeNav();
+  syncAria();
+  onScroll();
   app.style.minHeight = '';
   if (y) window.scrollTo({ top: y, behavior: 'instant' });
   RV = 'reveal';
@@ -417,6 +476,248 @@ function updateWorkList() {
   list.innerHTML = workListHtml();
   RV = prev;
 }
+
+// ============ 手機：底部面板（專案介紹、目錄） ============
+const sheet = { el: null, pn: null, open: false, pushed: false, ignorePop: 0, opener: null };
+
+function visibleSecs() {
+  return DATA.settings.sections.filter((s) => s.visible && hasContent(s.key));
+}
+
+function ensureSheet() {
+  if (sheet.el) return sheet;
+  const el = document.createElement('div');
+  el.className = 'sheet';
+  el.hidden = true;
+  el.innerHTML = `
+    <div class="sheet-bd" data-close></div>
+    <div class="sheet-pn" role="dialog" aria-modal="true" aria-labelledby="sheet-t" tabindex="-1">
+      <div class="sheet-hd">
+        <span class="sheet-grip" aria-hidden="true"></span>
+        <h2 class="sheet-t" id="sheet-t"></h2>
+        <button type="button" class="sheet-x" data-close>關閉</button>
+      </div>
+      <div class="sheet-body"></div>
+      <div class="sheet-ft" hidden></div>
+    </div>`;
+  document.body.appendChild(el);
+  sheet.el = el;
+  sheet.pn = $('.sheet-pn', el);
+  sheet.title = $('.sheet-t', el);
+  sheet.body = $('.sheet-body', el);
+  sheet.ft = $('.sheet-ft', el);
+
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('[data-close]')) return closeSheet();
+    const go = e.target.closest('[data-sheet-go]');
+    if (go) return openProjectSheet(go.dataset.sheetGo);
+    const jump = e.target.closest('[data-jump]');
+    if (jump) {
+      e.preventDefault();
+      const key = jump.dataset.jump;
+      closeSheet();
+      requestAnimationFrame(() => {
+        const t = document.getElementById(key);
+        if (key === 'hero') window.scrollTo({ top: 0, behavior: REDUCE ? 'auto' : 'smooth' });
+        else if (t) t.scrollIntoView({ block: 'start', behavior: REDUCE ? 'auto' : 'smooth' });
+      });
+    }
+  });
+
+  // 往下拖標題列就能關掉
+  const hd = $('.sheet-hd', el);
+  let drag = null;
+  hd.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('button') || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    drag = { y: e.clientY, t: performance.now(), dy: 0 };
+    sheet.pn.style.transition = 'none';
+    try { hd.setPointerCapture(e.pointerId); } catch (err) { /* 略過 */ }
+  });
+  hd.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    drag.dy = Math.max(0, e.clientY - drag.y);
+    sheet.pn.style.setProperty('--ty', drag.dy + 'px');
+  });
+  const end = () => {
+    if (!drag) return;
+    const { dy, t } = drag;
+    drag = null;
+    sheet.pn.style.transition = '';
+    sheet.pn.style.removeProperty('--ty');
+    const v = dy / Math.max(1, performance.now() - t);
+    if (dy > 110 || (dy > 36 && v > 0.55)) closeSheet();
+  };
+  hd.addEventListener('pointerup', end);
+  hd.addEventListener('pointercancel', end);
+
+  document.addEventListener('keydown', (e) => {
+    if (!sheet.open) return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeSheet();
+    } else if (e.key === 'Tab') {
+      const f = [...sheet.pn.querySelectorAll('a[href], button:not([disabled]), input, select, textarea')].filter((x) => x.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === sheet.pn)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+  return sheet;
+}
+
+function showSheet({ title, body, footer }, opener) {
+  const s = ensureSheet();
+  s.title.innerHTML = title;
+  s.body.innerHTML = body;
+  s.body.scrollTop = 0;
+  s.ft.innerHTML = footer || '';
+  s.ft.hidden = !footer;
+  if (s.open) return;
+  s.opener = opener || document.activeElement;
+  s.el.hidden = false;
+  s.open = true;
+  document.documentElement.classList.add('sheet-open');
+  app.inert = true;
+  if (MODE !== 'embed') {
+    try {
+      history.scrollRestoration = 'manual';
+      history.pushState({ sheet: 1 }, '');
+      s.pushed = true;
+    } catch (err) { s.pushed = false; }
+  }
+  // 兩個 frame 之後才加上 .in，滑入動畫才會出現
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (!s.open) return;
+    s.el.classList.add('in');
+    s.pn.focus({ preventScroll: true });
+  }));
+}
+
+function closeSheet() {
+  const s = sheet;
+  if (!s.el || !s.open) return;
+  s.open = false;
+  s.el.classList.remove('in');
+  s.pn.style.removeProperty('--ty');
+  document.documentElement.classList.remove('sheet-open');
+  app.inert = false;
+  const done = () => { if (!s.open) s.el.hidden = true; };
+  if (REDUCE) done();
+  else setTimeout(done, 340);
+  if (s.pushed) {
+    s.pushed = false;
+    s.ignorePop++;
+    history.back();
+    setTimeout(() => { s.ignorePop = 0; }, 600);
+  }
+  const o = s.opener;
+  s.opener = null;
+  if (o && o.isConnected) o.focus({ preventScroll: true });
+}
+
+// 手機按「返回」時，先關掉面板，而不是離開網站
+window.addEventListener('popstate', () => {
+  if (sheet.ignorePop > 0) {
+    sheet.ignorePop--;
+    return;
+  }
+  if (sheet.open) {
+    sheet.pushed = false;
+    closeSheet();
+  }
+});
+
+function openProjectSheet(id, opener) {
+  const p = DATA.projects.find((x) => x.id === id);
+  if (!p) return;
+  let list = filteredProjects();
+  let i = list.findIndex((x) => x.id === id);
+  if (i < 0) {
+    list = sortedProjects(DATA.projects);
+    i = list.findIndex((x) => x.id === id);
+  }
+  const prev = list[i - 1];
+  const next = list[i + 1];
+  const gh = safeUrl(p.links.github);
+  const demo = safeUrl(p.links.demo);
+  const cover = safeImg(p.cover);
+  const state = [STATUS[p.status], p.year].filter(Boolean).join('・');
+  const links = [];
+  if (demo) links.push(`<a class="btn" href="${esc(demo)}" target="_blank" rel="noopener">查看網站<span aria-hidden="true"> ↗</span></a>`);
+  if (gh) links.push(`<a class="btn btn-alt" href="${esc(gh)}" target="_blank" rel="noopener">GitHub<span aria-hidden="true"> ↗</span></a>`);
+  const nav = (q, label) => (q
+    ? `<button type="button" class="sh-nav" data-sheet-go="${esc(q.id)}"><small>${label}</small><span>${esc(q.name)}</span></button>`
+    : '<span></span>');
+  showSheet({
+    title: `${esc(p.name)}${p.featured ? '<span class="pin">精選</span>' : ''}`,
+    body: `
+      <p class="sh-meta"><i class="dot ${esc(p.status)}" aria-hidden="true"></i><span>${esc(state)}</span><span>${esc(p.category)}</span></p>
+      ${p.tagline ? `<p class="sh-tag">${esc(p.tagline)}</p>` : ''}
+      ${cover ? `<img class="d-cover" src="${esc(cover)}" alt="${esc(p.name)} 的畫面">` : ''}
+      ${p.desc ? `<p class="d-desc">${esc(p.desc)}</p>` : '<p class="d-desc d-none">還沒有詳細介紹。</p>'}
+      ${p.tech.length ? `<ul class="d-tech" aria-label="使用的技術">${p.tech.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+      ${links.length ? `<div class="sh-links">${links.join('')}</div>` : ''}`,
+    footer: prev || next ? nav(prev, '上一個') + nav(next, '下一個') : '',
+  }, opener);
+}
+
+function openMenuSheet(opener) {
+  const secs = visibleSecs();
+  const count = {
+    work: `${DATA.projects.length} 個專案`,
+    stack: `${DATA.stack.filter((g) => g.items.length).length} 類`,
+    devlog: `${DATA.logs.filter((l) => l.content.trim() || l.title.trim()).length} 篇`,
+    links: `${DATA.links.filter((l) => safeUrl(l.url)).length} 個`,
+  };
+  const rows = contactRows().slice(0, 2);
+  showSheet({
+    title: '目錄',
+    body: `
+      <nav class="menu" aria-label="全部區塊">
+        <a href="#hero" data-jump="hero"><span>首頁</span></a>
+        ${secs.map((s) => `<a href="#${s.key}" data-jump="${s.key}"${currentKey === s.key ? ' aria-current="true"' : ''}><span>${SECTION_LABELS[s.key]}</span>${count[s.key] ? `<small>${count[s.key]}</small>` : ''}</a>`).join('')}
+      </nav>
+      ${rows.length ? `<div class="sh-links">${rows.map(([label, href, val, ext], i) => `<a class="btn${i ? ' btn-alt' : ''}" href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ''}>${esc(label)}</a>`).join('')}</div>` : ''}
+      <p class="menu-sw" data-sw>${switchHtml()}</p>`,
+  }, opener);
+}
+
+// 手機上列的點擊是開面板，不是展開；螢幕閱讀器也要聽到對的說明
+function syncAria() {
+  const mob = isMobile();
+  app.querySelectorAll('.row-head').forEach((h) => {
+    if (mob) {
+      h.setAttribute('aria-haspopup', 'dialog');
+      h.removeAttribute('aria-expanded');
+    } else {
+      h.removeAttribute('aria-haspopup');
+      h.setAttribute('aria-expanded', String(view.open.has(h.closest('.row').dataset.id)));
+    }
+  });
+}
+
+function updateSwitch() {
+  document.querySelectorAll('[data-sw]').forEach((el) => { el.innerHTML = switchHtml(); });
+}
+
+document.addEventListener('click', (e) => {
+  const sw = e.target.closest('[data-switch]');
+  if (sw) Dev.set(sw.dataset.switch);
+});
+
+Dev.onChange(() => {
+  closeSheet();
+  updateSwitch();
+  syncAria();
+  onScroll();
+});
 
 // ============ 互動 ============
 function openProject(id) {
@@ -432,7 +733,21 @@ function openProject(id) {
 }
 
 app.addEventListener('click', (e) => {
+  if (e.target.closest('[data-menu]')) {
+    openMenuSheet(e.target.closest('[data-menu]'));
+    return;
+  }
+  if (e.target.closest('[data-dock="hero"]')) {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: REDUCE ? 'auto' : 'smooth' });
+    return;
+  }
   const jump = e.target.closest('[data-open]');
+  if (jump && isMobile()) {
+    e.preventDefault();
+    openProjectSheet(jump.dataset.open, jump);
+    return;
+  }
   if (jump && $('#workList')) {
     e.preventDefault();
     openProject(jump.dataset.open);
@@ -442,6 +757,10 @@ app.addEventListener('click', (e) => {
   if (head) {
     const li = head.closest('.row');
     const id = li.dataset.id;
+    if (isMobile()) {
+      openProjectSheet(id, head);
+      return;
+    }
     const open = head.getAttribute('aria-expanded') !== 'true';
     head.setAttribute('aria-expanded', String(open));
     $('.row-detail', li).classList.toggle('open', open);

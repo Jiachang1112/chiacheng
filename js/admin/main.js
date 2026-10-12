@@ -15,6 +15,26 @@ import backup from './views/backup.js';
 
 const { state } = core;
 const app = $('#app');
+// 裝置偵測在 <head> 的 js/device.js 完成；手機版有專屬的底部分頁列、底部彈窗與全螢幕預覽
+const Dev = window.Device || { current: () => (innerWidth <= 720 ? 'mobile' : 'desktop'), mode: () => 'auto', set() {}, onChange() {} };
+const isMobile = () => Dev.current() === 'mobile';
+
+// 手機底部分頁列：最常用的四個＋「更多」
+const TAB_KEYS = ['dashboard', 'projects', 'logs', 'messages'];
+const MORE_KEYS = ['profile', 'stack', 'links', 'appearance', 'backup'];
+const ICONS = {
+  dashboard: '<path d="M4 5h7v7H4zM13 5h7v4h-7zM13 11h7v8h-7zM4 14h7v5H4z"/>',
+  projects: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  logs: '<path d="M5 4h11l3 3v13H5zM8 10h8M8 14h8M8 18h5"/>',
+  messages: '<path d="M4 5h16v11H9l-5 4z"/>',
+  more: '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',
+};
+const icon = (k) => `<span class="ti"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[k]}</svg></span>`;
+
+function switchHtml() {
+  const mob = isMobile();
+  return `<button type="button" class="linkish" data-switch="${mob ? 'desktop' : 'mobile'}">${mob ? '切換成電腦版' : '切換成手機版'}</button>${Dev.mode() !== 'auto' ? '<button type="button" class="linkish" data-switch="auto">自動偵測</button>' : ''}`;
+}
 
 // anchor：預覽畫面要捲到哪個區塊
 const VIEWS = [
@@ -120,6 +140,7 @@ function buildShell() {
         <button type="button" class="linkish" id="newTab">在新分頁預覽草稿</button>
         <a href="./" target="_blank" rel="noopener">開啟網站</a>
         <button type="button" class="linkish" id="logout">登出</button>
+        <span class="side-sw" data-sw>${switchHtml()}</span>
       </div>
     </aside>
     <div class="side-back" id="sideBack"></div>
@@ -129,7 +150,7 @@ function buildShell() {
         <h1 id="vt"></h1>
         <span class="status" id="status" role="status"></span>
         <span class="grow"></span>
-        <button type="button" class="btn btn-sm pv-toggle" id="pvToggle" aria-pressed="false">即時預覽</button>
+        <button type="button" class="btn btn-sm pv-toggle" id="pvToggle" aria-pressed="false"><span class="pv-t-d">即時預覽</span><span class="pv-t-m">預覽</span></button>
         <button type="button" class="btn btn-sm" id="discard">放棄變更</button>
         <button type="button" class="btn btn-primary" id="publish">發布</button>
       </header>
@@ -144,10 +165,15 @@ function buildShell() {
               <button type="button" data-w="1280" aria-pressed="true" class="on">桌機</button>
             </div>
             <span class="hint">未發布的草稿，會即時更新。</span>
+            <button type="button" class="btn btn-sm pv-close" id="pvClose">關閉預覽</button>
           </div>
           <div class="pv-stage" id="pvStage"><iframe id="pvFrame" title="網站預覽" tabindex="-1"></iframe></div>
         </aside>
       </div>
+      <nav class="tabbar" id="tabbar" aria-label="主選單">
+        ${TAB_KEYS.map((k) => { const v = VIEWS.find((x) => x.key === k); return `<a class="tab" href="#/${k}" data-key="${k}">${icon(k)}<span>${esc(v.label)}</span>${v.badge ? '<span class="badge" data-badge="' + k + '" hidden></span>' : ''}</a>`; }).join('')}
+        <button type="button" class="tab" id="tabMore" data-key="more" aria-haspopup="dialog">${icon('more')}<span>更多</span></button>
+      </nav>
     </div>
   </div>`;
 
@@ -159,21 +185,24 @@ function buildShell() {
     const w = stage.clientWidth;
     const h = stage.clientHeight;
     if (!w || !h) return;
-    const s = Math.min(1, w / pv.width);
-    frame.style.width = pv.width + 'px';
+    // 手機上預覽是全螢幕，用真實寬度顯示，網站會自己切到手機版
+    const width = isMobile() ? w : pv.width;
+    const s = Math.min(1, w / width);
+    frame.style.width = width + 'px';
     frame.style.height = h / s + 'px';
     frame.style.transform = `scale(${s})`;
-    frame.style.marginLeft = Math.max(0, (w - pv.width * s) / 2) + 'px';
+    frame.style.marginLeft = Math.max(0, (w - width * s) / 2) + 'px';
   };
   new ResizeObserver(fit).observe(stage);
   pv.fit = fit;
 
-  const setPreview = (on) => {
+  // persist=false：視窗大小改變時自動收起／展開，不當成使用者的選擇記起來
+  const setPreview = (on, persist = true) => {
     pv.on = on;
     $('#work').classList.toggle('with-pv', on);
     $('#pvToggle').setAttribute('aria-pressed', String(on));
     $('#pvToggle').classList.toggle('on', on);
-    safeLS.set(PV_KEY, on ? '1' : '0');
+    if (persist && !isMobile()) safeLS.set(PV_KEY, on ? '1' : '0');
     if (on && !pv.loaded) {
       pv.loaded = true;
       frame.src = './index.html?embed=1';
@@ -181,6 +210,8 @@ function buildShell() {
     requestAnimationFrame(fit);
   };
   $('#pvToggle').addEventListener('click', () => setPreview(!pv.on));
+  $('#pvClose').addEventListener('click', () => setPreview(false));
+  pv.set = setPreview;
   $('.pv-bar .seg', app).addEventListener('click', (e) => {
     const b = e.target.closest('[data-w]');
     if (!b) return;
@@ -194,8 +225,10 @@ function buildShell() {
   });
   const wide = window.matchMedia('(min-width: 1180px)');
   const saved = safeLS.get(PV_KEY);
-  if (wide.matches && saved !== '0') setPreview(true);
-  wide.addEventListener('change', (e) => { if (!e.matches && pv.on) setPreview(false); });
+  if (wide.matches && saved !== '0' && !isMobile()) setPreview(true);
+  wide.addEventListener('change', (e) => { if (!e.matches && pv.on) setPreview(false, false); });
+  pv.wide = wide;
+  $('#tabMore').addEventListener('click', openMore);
 
   // ---- 選單（手機） ----
   const side = $('#side');
@@ -228,6 +261,18 @@ function buildShell() {
 
   if (!subscribed) {
     subscribed = true;
+    // 手機和電腦版的預覽方式不同（全螢幕蓋上去 vs 並排），換版面時先收起來
+    Dev.onChange(() => {
+      if (!$('#shell') || !pv) return;
+      if (pv.on) pv.set(false, false);
+      if (!isMobile() && pv.wide.matches && safeLS.get(PV_KEY) !== '0') pv.set(true, false);
+      $$('[data-sw]', app).forEach((el) => { el.innerHTML = switchHtml(); });
+      requestAnimationFrame(pv.fit);
+    });
+    app.addEventListener('click', (e) => {
+      const sw = e.target.closest('[data-switch]');
+      if (sw) Dev.set(sw.dataset.switch);
+    });
     core.subscribe((why) => {
       if (!$('#shell')) return;
       if (why === 'draft') {
@@ -261,6 +306,40 @@ function buildShell() {
   }
 }
 
+// ============ 手機：「更多」面板 ============
+function openMore() {
+  const body = document.createElement('div');
+  body.innerHTML = `
+    <nav class="more-list" aria-label="更多功能">
+      ${MORE_KEYS.map((k) => { const v = VIEWS.find((x) => x.key === k); return `<a href="#/${k}" data-more${current.key === k ? ' aria-current="page"' : ''}>${esc(v.label)}</a>`; }).join('')}
+    </nav>
+    <div class="more-acts">
+      <button type="button" class="btn" data-act="preview">預覽草稿</button>
+      <a class="btn" href="./" target="_blank" rel="noopener">開啟網站</a>
+      <button type="button" class="btn" data-act="discard"${!state.published || !state.dirty ? ' disabled' : ''}>放棄變更</button>
+      <button type="button" class="btn btn-danger" data-act="logout">登出</button>
+    </div>
+    <p class="more-sw" data-sw>${switchHtml()}</p>
+    <p class="hint more-user">${esc(state.user.email || '')}</p>`;
+  const m = openModal({ title: '更多', body, size: 'sm', footer: [] });
+  body.addEventListener('click', (e) => {
+    if (e.target.closest('[data-more]')) return m.close();
+    const sw = e.target.closest('[data-switch]');
+    if (sw) {
+      m.close();
+      Dev.set(sw.dataset.switch);
+      return;
+    }
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    m.close();
+    const act = b.dataset.act;
+    if (act === 'preview') pv.set(true);
+    else if (act === 'discard') $('#discard').click();
+    else if (act === 'logout') $('#logout').click();
+  });
+}
+
 // ============ 畫面 ============
 function renderView(keepScroll) {
   const key = routeKey();
@@ -277,12 +356,13 @@ function renderView(keepScroll) {
   scroller.scrollTop = top;
   $('#vt').textContent = current.label;
   document.title = current.label + ' · 後台';
-  $$('.side nav a', app).forEach((a) => {
+  $$('.side nav a, .tabbar a', app).forEach((a) => {
     const on = a.dataset.key === current.key;
     a.classList.toggle('on', on);
     if (on) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
   });
+  $('#tabMore').classList.toggle('on', MORE_KEYS.includes(current.key));
   if (!keepScroll) gotoPreview();
 }
 
@@ -304,7 +384,7 @@ function updateStatus() {
     text = '有尚未發布的變更';
   }
   st.className = 'status ' + cls;
-  st.innerHTML = `<i class="dot"></i>${esc(text)}`;
+  st.innerHTML = `<i class="dot"></i><span class="st-t">${esc(text)}</span>`;
   const can = state.canPublish && (state.dirty || state.isNew);
   pubBtn.disabled = !can;
   pubBtn.title = !state.canPublish ? '讀不到線上資料，為了避免蓋掉原本的內容，暫時不能發布。' : can ? '' : '沒有需要發布的變更';
