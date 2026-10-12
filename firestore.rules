@@ -1,0 +1,51 @@
+rules_version = '2';
+
+// 使用方式：
+// 1. 把下面的 YOUR_ADMIN_EMAIL 換成你登入後台的 Email（在 Firebase 主控台貼上時改就好，不必改這個檔案）
+// 2. 打開 Firebase 主控台 → Firestore Database → 規則，整份貼上後按「發布」
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 只有這個帳號可以寫入
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'YOUR_ADMIN_EMAIL';
+    }
+
+    // 網站內容：任何人都能讀（前台要用），只有管理員能改
+    match /portfolio/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 舊版後台的連結集合：公開讀取，只有管理員能改
+    match /links/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 發布紀錄：只有管理員看得到
+    match /portfolio_history/{doc} {
+      allow read, write: if isAdmin();
+    }
+
+    // 訪客留言：任何人都可以送出（限制欄位與長度），只有管理員能讀、標記、刪除
+    match /messages/{doc} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'email', 'message', 'createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 120
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 5
+        && request.resource.data.message.size() <= 2000
+        && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 其他一律不開放
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
