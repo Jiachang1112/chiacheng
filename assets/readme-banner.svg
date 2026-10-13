@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" role="img" aria-labelledby="t d">
+  <title id="t">chiacheng1112.com 個人作品集</title>
+  <desc id="d">洪嘉成的個人作品集與管理後台</desc>
+  <defs>
+    <linearGradient id="band" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2f45d1"/>
+      <stop offset=".33" stop-color="#b3245f"/>
+      <stop offset=".66" stop-color="#0b7a5c"/>
+      <stop offset="1" stop-color="#f2b705"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a2146"/>
+      <stop offset="1" stop-color="#2f45d1"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0b1030" flood-opacity=".35"/>
+    </filter>
+    <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.6" fill="#ffffff" fill-opacity=".14"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="420" fill="url(#bg)"/>
+  <rect width="1200" height="420" fill="url(#dots)"/>
+
+  <!-- 裝飾色塊 -->
+  <circle cx="1090" cy="70" r="150" fill="#b3245f" fill-opacity=".38"/>
+  <circle cx="1010" cy="380" r="120" fill="#0b7a5c" fill-opacity=".42"/>
+  <circle cx="90" cy="400" r="110" fill="#f2b705" fill-opacity=".30"/>
+
+  <!-- 紙張卡片 -->
+  <g filter="url(#shadow)">
+    <rect x="90" y="62" width="1020" height="296" rx="18" fill="#fdfdfb"/>
+  </g>
+  <rect x="90" y="62" width="1020" height="10" rx="5" fill="url(#band)"/>
+  <!-- 筆記本裝訂孔 -->
+  <g fill="#1a2146" fill-opacity=".14">
+    <circle cx="124" cy="130" r="8"/><circle cx="124" cy="210" r="8"/><circle cx="124" cy="290" r="8"/>
+  </g>
+
+  <!-- 螢光筆底 + 名字 -->
+  <rect x="176" y="150" width="318" height="62" rx="4" fill="#ffe56a"/>
+  <text x="188" y="200" font-family="'LXGW WenKai TC','Kaiti TC','BiauKai','Noto Serif CJK TC','Noto Serif TC',serif" font-size="58" font-weight="700" fill="#1a2146">洪嘉成</text>
+  <text x="520" y="200" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif" font-size="34" font-weight="700" fill="#2f45d1">chiacheng1112.com</text>
+
+  <text x="176" y="258" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif" font-size="24" fill="#4a5070">純靜態作品集 ‧ Firebase ‧ 自製後台 ‧ 自動切換手機版</text>
+
+  <!-- 配色晶片：四套配色 -->
+  <g transform="translate(176 292)">
+    <g>
+      <rect width="46" height="30" rx="6" fill="#2f45d1"/><text x="58" y="22" font-family="'Noto Sans TC',system-ui,sans-serif" font-size="17" fill="#1a2146">原子筆藍</text>
+    </g>
+    <g transform="translate(160 0)">
+      <rect width="46" height="30" rx="6" fill="#b3261e"/><text x="58" y="22" font-family="'Noto Sans TC',system-ui,sans-serif" font-size="17" fill="#1a2146">墨黑</text>
+    </g>
+    <g transform="translate(290 0)">
+      <rect width="46" height="30" rx="6" fill="#0b7a5c"/><text x="58" y="22" font-family="'Noto Sans TC',system-ui,sans-serif" font-size="17" fill="#1a2146">墨綠</text>
+    </g>
+    <g transform="translate(420 0)">
+      <rect width="46" height="30" rx="6" fill="#b3245f"/><text x="58" y="22" font-family="'Noto Sans TC',system-ui,sans-serif" font-size="17" fill="#1a2146">莓紅</text>
+    </g>
+  </g>
+
+  <!-- 手機小圖示 -->
+  <g transform="translate(900 104)">
+    <rect width="150" height="222" rx="22" fill="#1a2146"/>
+    <rect x="9" y="12" width="132" height="198" rx="14" fill="#fdfdfb"/>
+    <rect x="22" y="30" width="62" height="14" rx="3" fill="#ffe56a"/>
+    <rect x="22" y="54" width="106" height="7" rx="3" fill="#1a2146" fill-opacity=".75"/>
+    <rect x="22" y="68" width="84" height="7" rx="3" fill="#1a2146" fill-opacity=".35"/>
+    <rect x="22" y="90" width="48" height="44" rx="7" fill="#2f45d1"/>
+    <rect x="78" y="90" width="50" height="44" rx="7" fill="#b3245f"/>
+    <rect x="22" y="142" width="48" height="36" rx="7" fill="#0b7a5c"/>
+    <rect x="78" y="142" width="50" height="36" rx="7" fill="#f2b705"/>
+    <rect x="30" y="188" width="90" height="14" rx="7" fill="#1a2146" fill-opacity=".9"/>
+  </g>
+</svg>
