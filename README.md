@@ -1,11 +1,10 @@
 <div align="center">
 
-<img src="assets/readme-banner.svg" alt="洪嘉成 chiacheng1112.com 個人作品集" width="100%">
+<img src="assets/readme-banner.svg" alt="chiacheng1112.com 個人作品集" width="100%">
 
 <br>
 
 [![前台網站](https://img.shields.io/badge/%F0%9F%8C%90_%E5%89%8D%E5%8F%B0%E7%B6%B2%E7%AB%99-chiacheng1112.com-2f45d1?style=for-the-badge)](https://chiacheng1112.com/)
-[![管理後台](https://img.shields.io/badge/%F0%9F%9B%A0%EF%B8%8F_%E7%AE%A1%E7%90%86%E5%BE%8C%E5%8F%B0-admin.html-b3245f?style=for-the-badge)](https://chiacheng1112.com/admin.html)
 [![手機版](https://img.shields.io/badge/%F0%9F%93%B1_%E6%89%8B%E6%A9%9F%E7%89%88-%3Fview%3Dmobile-0b7a5c?style=for-the-badge)](https://chiacheng1112.com/?view=mobile)
 [![GitHub](https://img.shields.io/badge/GitHub-Jiachang1112-1a2146?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Jiachang1112)
 
@@ -606,7 +605,7 @@ Firebase → Authentication → Settings → 已授權網域，加入你的網�
 
 <div align="center">
 
-**洪嘉成**　‧　[chiacheng1112.com](https://chiacheng1112.com/)　‧　[GitHub @Jiachang1112](https://github.com/Jiachang1112)
+[chiacheng1112.com](https://chiacheng1112.com/)　‧　[GitHub @Jiachang1112](https://github.com/Jiachang1112)
 
 [![回到最上面](https://img.shields.io/badge/%E2%AC%86%EF%B8%8F_%E5%9B%9E%E5%88%B0%E6%9C%80%E4%B8%8A%E9%9D%A2-2f45d1?style=for-the-badge)](#)
 
