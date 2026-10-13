@@ -1,3 +1,5 @@
+<a id="top"></a>
+
 <div align="center">
 
 <img src="assets/readme-banner.svg" alt="chiacheng1112.com 個人作品集" width="100%">
@@ -86,7 +88,7 @@ flowchart LR
     S -->|讀取內容| F[(🔥 Firestore<br/>portfolio/site_data_v1)]:::orange
     V -->|送出留言| M[(messages)]:::orange
     A([🧑‍💻 管理員]):::pink -->|Email 登入| AU[Firebase Auth]:::orange
-    AU --> AD[admin.html<br/>後台]:::green
+    AU --> AD[管理後台]:::green
     AD -->|發布| F
     AD -->|留下紀錄| H[(portfolio_history)]:::orange
     M -.->|在後台收件匣看到| AD
@@ -99,14 +101,13 @@ flowchart LR
 
 - 網站是**純靜態檔案**，不需要 `npm install`，也不需要 build，丟到任何靜態主機就能跑。
 - 內容整份存在 Firestore 的**一份文件**裡（`portfolio/site_data_v1`）。Firebase 連不上時，前台會用內建的預設內容顯示，不會整頁空白。
-- 後台是同一個專案裡的 `admin.html`，用 Firebase Authentication 的 Email／密碼登入。
+- 管理後台是同一個專案裡的獨立頁面，用 Firebase Authentication 的 Email／密碼登入。
 
 ### 📁 檔案說明
 
 ```text
 chiacheng/
 ├── index.html              前台入口（內容由 js/site.js 畫出來）
-├── admin.html              後台入口（已設 noindex，搜尋引擎不會收錄）
 ├── 404.html                找不到頁面
 ├── firestore.rules         Firestore 安全規則（要貼到 Firebase 主控台）
 ├── robots.txt              搜尋引擎規則
@@ -156,7 +157,6 @@ python3 -m http.server 8000
 | 🌐 前台（自動偵測裝置） | http://localhost:8000/ |
 | 📱 強制看手機版 | http://localhost:8000/?view=mobile |
 | 🖥️ 強制看電腦版 | http://localhost:8000/?view=desktop |
-| 🛠️ 後台 | http://localhost:8000/admin.html |
 
 > ⚠️ 不能直接雙擊 `index.html` 開啟。檔案用 ES Modules，瀏覽器要求透過 `http://` 載入。
 
@@ -241,7 +241,7 @@ function isAdmin() {
 <details open>
 <summary><b>⑥ 登入後台，第一次發布</b></summary>
 
-1. 打開 `/admin.html`，用管理員帳號登入。忘記密碼可以按「忘記密碼」寄重設信。
+1. 打開管理後台頁面，用管理員帳號登入。忘記密碼可以按「忘記密碼」寄重設信。
 2. 隨意改一點內容，按右上角「發布」。第一次發布會把目前內容寫進雲端。
 3. 重新整理前台，看到更新就完成了。
 
@@ -261,7 +261,7 @@ function isAdmin() {
 
 ## 🧭 後台使用教學
 
-登入 `/admin.html` 後，左側（手機是底部）可以切換各頁。**改了什麼都不會立刻上線**，先存成草稿，確認後再發布。
+登入管理後台後，左側（手機是底部）可以切換各頁。**改了什麼都不會立刻上線**，先存成草稿，確認後再發布。
 
 ```mermaid
 flowchart LR
@@ -512,7 +512,7 @@ flowchart TD
 | 結構化資料 | `index.html` | JSON-LD（Person） |
 | 網站地圖 | `sitemap.xml` | 列出要收錄的網址與更新日期 |
 | 爬蟲規則 | `robots.txt` | 允許全站，並指向 sitemap |
-| 不要收錄的頁面 | `admin.html`、`404.html` | 已設 `noindex` |
+| 不要收錄的頁面 | 管理後台、`404.html` | 已設 `noindex` |
 | 沒有 JavaScript 時 | `<noscript>` | 姓名、簡介與 GitHub 連結的靜態文字 |
 
 ### 在 Google Search Console 完成收錄
@@ -533,7 +533,7 @@ flowchart TD
 | 誰能改內容 | Firestore 規則只放行 `isAdmin()` 清單裡的信箱 |
 | 留言防濫用 | 只能「新增」，欄位限定 `name`、`email`、`message`、`createdAt`，長度有上限（姓名 80、Email 120、留言 5–2000 字），時間必須是伺服器時間 |
 | 其他路徑 | 一律拒絕 |
-| 後台不被收錄 | `admin.html` 設有 `noindex` |
+| 後台不被收錄 | 後台頁面設有 `noindex` |
 | 防止誤蓋資料 | 讀不到線上資料不能發布；發布前會檢查線上版本有沒有被別處改過 |
 | 可以後悔 | 最近 20 次發布紀錄可還原到草稿 |
 
@@ -607,6 +607,6 @@ Firebase → Authentication → Settings → 已授權網域，加入你的網�
 
 [chiacheng1112.com](https://chiacheng1112.com/)　‧　[GitHub @Jiachang1112](https://github.com/Jiachang1112)
 
-[![回到最上面](https://img.shields.io/badge/%E2%AC%86%EF%B8%8F_%E5%9B%9E%E5%88%B0%E6%9C%80%E4%B8%8A%E9%9D%A2-2f45d1?style=for-the-badge)](#)
+[![回到最上面](https://img.shields.io/badge/%E2%AC%86%EF%B8%8F_%E5%9B%9E%E5%88%B0%E6%9C%80%E4%B8%8A%E9%9D%A2-2f45d1?style=for-the-badge)](#top)
 
 </div>
