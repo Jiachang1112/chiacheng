@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" role="img" aria-labelledby="t d">
   <title id="t">chiacheng1112.com 個人作品集</title>
-  <desc id="d">洪嘉成的個人作品集與管理後台</desc>
+  <desc id="d">個人作品集</desc>
   <defs>
     <linearGradient id="band" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#2f45d1"/>
@@ -40,10 +40,10 @@
 
   <!-- 螢光筆底 + 名字 -->
   <rect x="176" y="150" width="318" height="62" rx="4" fill="#ffe56a"/>
-  <text x="188" y="200" font-family="'LXGW WenKai TC','Kaiti TC','BiauKai','Noto Serif CJK TC','Noto Serif TC',serif" font-size="58" font-weight="700" fill="#1a2146">洪嘉成</text>
+  <text x="188" y="200" font-family="'LXGW WenKai TC','Kaiti TC','BiauKai','Noto Serif CJK TC','Noto Serif TC',serif" font-size="58" font-weight="700" fill="#1a2146">個人作品集</text>
   <text x="520" y="200" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif" font-size="34" font-weight="700" fill="#2f45d1">chiacheng1112.com</text>
 
-  <text x="176" y="258" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif" font-size="24" fill="#4a5070">純靜態作品集 ‧ Firebase ‧ 自製後台 ‧ 自動切換手機版</text>
+  <text x="176" y="258" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif" font-size="24" fill="#4a5070">純靜態 ‧ Firebase ‧ 自製後台 ‧ 自動切換手機版</text>
 
   <!-- 配色晶片：四套配色 -->
   <g transform="translate(176 292)">
