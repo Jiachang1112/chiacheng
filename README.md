@@ -62,8 +62,8 @@ CNAME                 自訂網域
 
 ## 設定 Firebase（第一次必做）
 
-1. 在 Firebase 主控台 → Authentication 建立一個 Email／密碼帳號，這就是後台的登入帳號。
-2. 打開 `firestore.rules`，把 `YOUR_ADMIN_EMAIL` 換成那個 Email，整份貼到
+1. 在 Firebase 主控台 → Authentication 為每位管理員各建立一個 Email／密碼帳號，這些就是後台的登入帳號。
+2. 打開 `firestore.rules`，把 `ADMIN_EMAILS` 清單裡的三個範例信箱換成那些 Email（小寫；只有兩位就刪掉一行），整份貼到
    Firestore Database → 規則，按「發布」。沒有做這一步，後台無法儲存，聯絡表單也無法送出。
 3. 開啟 `/admin.html` 登入。第一次按「發布」會把目前的內容寫進雲端。
 
