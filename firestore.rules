@@ -1,7 +1,7 @@
 rules_version = '2';
 
 // 使用方式：
-// 1. 把下面 ADMIN_EMAILS 裡的信箱換成可以登入後台的帳號（可以放 1～3 個以上，一律小寫）。
+// 1. 把下面 isAdmin() 清單裡的範例信箱換成可以登入後台的帳號（可以放 1～3 個以上，一律小寫）。
 //    這些信箱也要先在 Firebase 主控台 → Authentication 建立成 Email／密碼帳號。
 // 2. 打開 Firebase 主控台 → Firestore Database → 規則，整份貼上後按「發布」
 service cloud.firestore {
