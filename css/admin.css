@@ -587,3 +587,7 @@ html[data-device="mobile"] { -webkit-tap-highlight-color: transparent; --tab-h: 
 
 [data-device="mobile"] .seo-fields { max-width: none; }
 [data-device="mobile"] .serp-fit { padding: 14px 12px; }
+
+.seo-tabs { margin: 2px 0 10px; flex-wrap: wrap; }
+.seo-url { margin: 0 0 12px; }
+.seo-url code { background: var(--tint); padding: 1px 6px; border-radius: 3px; font-size: .92em; word-break: break-all; }

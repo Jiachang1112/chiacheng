@@ -78,6 +78,24 @@ Firestore 規則只讓你指定的信箱寫入，訪客只能讀取內容、送�
 </tr>
 </table>
 
+### 🔗 每個區塊都有自己的頁面
+
+首頁是一頁往下捲的完整介紹，作品、技術、日誌、聯絡也各自有可以**單獨開啟、單獨分享、單獨被 Google 收錄**的網址：
+
+| 頁面 | 網址 | 內容 |
+| --- | --- | --- |
+| 🏠 首頁 | `/` | 自我介紹加上所有區塊，往下捲動閱讀 |
+| 🗂️ 作品 | `/work/` | 全部專案，可搜尋、依分類篩選、點開看介紹 |
+| 🧰 技術 | `/stack/` | 用過的技術與工具分類 |
+| 📓 日誌 | `/devlog/` | 開發筆記與更新紀錄 |
+| 💌 聯絡 | `/contact/` | Email、GitHub 與聯絡表單 |
+
+- 每一頁的頂欄、頁尾、手機底部導覽與目錄都會連到對應頁面，目前所在的頁面會標示出來。
+- 首頁每個區塊右上角有「前往…專頁」連結。
+- 每一頁都有自己的標題、說明與正式網址，後台「搜尋結果」可以分別修改。
+- 在後台把某個區塊隱藏或清空時，對應頁面會顯示「沒有內容」，並自動加上 `noindex`，不會被 Google 收錄。
+- 舊網址 `/post-example/` 會自動轉到 `/devlog/`。
+
 ---
 
 ## 🧩 運作方式
@@ -101,13 +119,19 @@ flowchart LR
 
 - 網站是**純靜態檔案**，不需要 `npm install`，也不需要 build，丟到任何靜態主機就能跑。
 - 內容整份存在 Firestore 的**一份文件**裡（`portfolio/site_data_v1`）。Firebase 連不上時，前台會用內建的預設內容顯示，不會整頁空白。
+- 首頁與四個專頁共用同一支 `js/site.js`：頁面的 `<body data-page="…">` 決定只畫哪一個區塊，首頁則畫全部。
 - 管理後台是同一個專案裡的獨立頁面，用 Firebase Authentication 的 Email／密碼登入。
 
 ### 📁 檔案說明
 
 ```text
 chiacheng/
-├── index.html              前台入口（內容由 js/site.js 畫出來）
+├── index.html              首頁入口（內容由 js/site.js 畫出來）
+├── work/index.html         作品專頁   /work/
+├── stack/index.html        技術專頁   /stack/
+├── devlog/index.html       日誌專頁   /devlog/
+├── contact/index.html      聯絡專頁   /contact/
+├── post-example/           舊網址，轉到 /devlog/
 ├── 404.html                找不到頁面
 ├── firestore.rules         Firestore 安全規則（要貼到 Firebase 主控台）
 ├── robots.txt              搜尋引擎規則
@@ -119,15 +143,15 @@ chiacheng/
 │   └── admin.css           後台樣式（含手機版）
 └── js/
     ├── device.js           裝置偵測，前台與後台共用
-    ├── data.js             預設內容、資料整理 normalize()、共用工具
+    ├── data.js             預設內容、資料整理 normalize()、各頁標題與說明 seoText()
     ├── store.js            Firebase 連線與前台讀取（SDK 動態載入）
-    ├── site.js             前台：各區塊、作品篩選、聯絡表單、捲動淡入
+    ├── site.js             前台：首頁與各專頁、作品篩選、聯絡表單、捲動淡入
     └── admin/
         ├── main.js         登入、外框、路由、發布流程、即時預覽
         ├── core.js         草稿、發布、檢查、變更摘要
         ├── cloud.js        後台用的 Firebase 操作與錯誤訊息
         ├── ui.js           對話框、提示、標籤輸入等小元件
-        └── views/          總覽、基本資料、專案、技術、日誌、連結、外觀、訊息、備份
+        └── views/          總覽、基本資料、專案、技術、日誌、連結、外觀、搜尋結果、訊息、備份
 ```
 
 ---
@@ -157,6 +181,7 @@ python3 -m http.server 8000
 | 🌐 前台（自動偵測裝置） | http://localhost:8000/ |
 | 📱 強制看手機版 | http://localhost:8000/?view=mobile |
 | 🖥️ 強制看電腦版 | http://localhost:8000/?view=desktop |
+| 🗂️ 各區塊專頁 | http://localhost:8000/work/　`/stack/`　`/devlog/`　`/contact/` |
 
 > ⚠️ 不能直接雙擊 `index.html` 開啟。檔案用 ES Modules，瀏覽器要求透過 `http://` 載入。
 
@@ -375,13 +400,14 @@ flowchart LR
 <details>
 <summary><b>🔎 搜尋結果</b>　改 Google 搜尋結果裡的標題與說明</summary>
 
-- **標題**：搜尋結果裡的藍色標題，也是瀏覽器分頁標題。留空會自動用「姓名 · 作品集」。
-- **說明**：標題下面那一小段字，也是分享到 LINE、Facebook 時卡片上的說明。留空會用首頁標語加簡介的前 120 字。
+- **每一頁各自設定**：最上方切換「首頁／作品／技術／日誌／聯絡」，各有自己的標題與說明，頁面網址會跟著顯示。
+- **標題**：搜尋結果裡的藍色標題，也是瀏覽器分頁標題。留空會自動產生：首頁是「姓名 · 作品集」，專頁是「作品 · 姓名」這樣的格式。
+- **說明**：標題下面那一小段字，也是分享到 LINE、Facebook 時卡片上的說明。留空會自動產生：首頁用標語加簡介的前 120 字，專頁則用該頁的內容摘要（例如作品頁會列出幾個專案名稱）。
 - **即時預覽**：照 Google 實際的字體大小與換行畫出來，可以切換**手機**與**電腦**兩種版面，超出的字會顯示成「…」，馬上看得出哪裡被截掉。
 - **字數提示**：標題建議 28 字內，說明建議 60 字內，重點放前面。
 - **分享卡片預覽**：LINE、Facebook 貼網址時看到的卡片。
 - 每個欄位都有「改回自動產生」。
-- 發布後，到 Google Search Console 對首頁按「要求建立索引」，Google 通常幾天內更新。Google 會自己決定顯示哪一段字，不一定完全照你寫的。
+- 發布後，到 Google Search Console 對該頁網址按「要求建立索引」，Google 通常幾天內更新。Google 會自己決定顯示哪一段字，不一定完全照你寫的。
 
 </details>
 
@@ -421,7 +447,7 @@ flowchart LR
 
 | | 🌐 前台手機版 | 🛠️ 後台手機版 |
 | --- | --- | --- |
-| 導覽 | 底部導覽列（首頁／作品／聯絡／目錄）加目錄面板 | 底部分頁列（總覽／專案／日誌／訊息／更多） |
+| 導覽 | 底部導覽列（首頁／作品／聯絡／目錄）加目錄面板；在專頁裡，目前這一頁會自動出現在導覽列 | 底部分頁列（總覽／專案／日誌／訊息／更多） |
 | 專案 | 點開從底部滑出介紹面板，可往下拖或按返回鍵關閉，面板內可上一個／下一個 | 專案清單變成卡片 |
 | 對話框 | — | 全部變成底部彈窗 |
 | 其他 | 「正在線上運作」變成橫向滑動卡片、分類篩選變成可滑動晶片 | 預覽改成全螢幕，用手機真實寬度顯示 |
@@ -509,7 +535,7 @@ flowchart TD
 
 </details>
 
-部署完成後，記得回 Firebase → Authentication → Settings → **已授權網域**，加入正式網域，否則後台登入會失敗。自訂網域寫在 `CNAME`，換網域時要一併修改，並更新 `index.html` 的 canonical、`sitemap.xml` 與 `robots.txt` 裡的網址。
+部署完成後，記得回 Firebase → Authentication → Settings → **已授權網域**，加入正式網域，否則後台登入會失敗。自訂網域寫在 `CNAME`，換網域時要一併修改，並更新 `index.html` 與四個專頁（`work/`、`stack/`、`devlog/`、`contact/`）裡的 canonical 與分享網址、`sitemap.xml` 與 `robots.txt` 裡的網址。
 
 ---
 
@@ -519,21 +545,22 @@ flowchart TD
 
 | 項目 | 位置 | 說明 |
 | --- | --- | --- |
-| 標題與描述 | `index.html` | 可在後台「搜尋結果」頁修改，並有即時預覽 |
-| Canonical 網址 | `index.html` | 指定正式網址，避免重複內容 |
-| 社群分享預覽 | `index.html`、`assets/og.png` | Open Graph 與 Twitter Card |
-| 結構化資料 | `index.html` | JSON-LD（Person） |
-| 網站地圖 | `sitemap.xml` | 列出要收錄的網址與更新日期 |
+| 獨立頁面 | `/`、`/work/`、`/stack/`、`/devlog/`、`/contact/` | 每個區塊一個網址，各自被收錄 |
+| 標題與描述 | 每個頁面的 `.html` | 各頁獨立，可在後台「搜尋結果」頁分別修改，並有即時預覽 |
+| Canonical 網址 | 每個頁面的 `.html` | 指定各頁的正式網址，避免重複內容 |
+| 社群分享預覽 | 每個頁面的 `.html`、`assets/og.png` | Open Graph 與 Twitter Card |
+| 結構化資料 | 首頁 JSON-LD（Person）、專頁 BreadcrumbList | 讓 Google 看懂網站結構 |
+| 網站地圖 | `sitemap.xml` | 列出 5 個網址與更新日期 |
 | 爬蟲規則 | `robots.txt` | 允許全站，並指向 sitemap |
-| 不要收錄的頁面 | 管理後台、`404.html` | 已設 `noindex` |
-| 沒有 JavaScript 時 | `<noscript>` | 姓名、簡介與 GitHub 連結的靜態文字 |
+| 不要收錄的頁面 | 管理後台、`404.html`、被隱藏或沒有內容的專頁 | 已設 `noindex` |
+| 沒有 JavaScript 時 | `<noscript>` | 該頁的標題與簡介，加上回首頁與 GitHub 連結的靜態文字 |
 
 ### 在 Google Search Console 完成收錄
 
 1. 打開 [Search Console](https://search.google.com/search-console)，新增資源。**網域資源**要在 DNS 加一筆 TXT 驗證；**網址前置字元資源**可以用 HTML 標記驗證。
 2. 左側 **Sitemap** → 輸入 `https://你的網域/sitemap.xml` → 提交。剛送出時顯示「無法擷取」通常是暫時的，過一兩天再看。
-3. 上方搜尋列貼上首頁網址 → 按 **要求建立索引**。
-4. 改了網站內容後，重複第 3 步，Google 會比較快更新。
+3. 上方搜尋列依序貼上 `/`、`/work/`、`/stack/`、`/devlog/`、`/contact/` 的網址 → 各按一次 **要求建立索引**。
+4. 改了網站內容或搜尋結果的標題與說明後，對有改的那一頁重複第 3 步，Google 會比較快更新。
 
 > ⏳ 收錄通常需要幾天，第一次可能更久。這段時間搜尋結果可能還是舊的，屬於正常現象。
 
