@@ -1,7 +1,7 @@
 // 前台：讀取資料、產生頁面、捲動淡入。
 import {
   DEFAULT_DATA, SECTION_LABELS, STATUS,
-  normalize, fingerprint, esc, safeUrl, safeImg, host, mdLite, fmtDate, themeVars, countTech, isEmail, sectionHasContent,
+  normalize, fingerprint, esc, safeUrl, safeImg, host, mdLite, fmtDate, themeVars, countTech, isEmail, sectionHasContent, seoText,
 } from './data.js';
 import { loadPublished, readCache, writeCache, readDraft, sendMessage } from './store.js';
 
@@ -345,8 +345,7 @@ function applyMeta() {
   const root = document.documentElement;
   const vars = themeVars(s.theme);
   Object.keys(vars).forEach((k) => root.style.setProperty(k, vars[k]));
-  const title = s.siteTitle || `${DATA.hero.name} · 作品集`;
-  const desc = s.metaDescription || [DATA.hero.tagline, DATA.hero.intro].filter(Boolean).join(' ').slice(0, 120);
+  const { title, desc } = seoText(DATA);
   document.title = title;
   setMeta('meta[name="description"]', 'content', desc);
   setMeta('meta[property="og:title"]', 'content', title);

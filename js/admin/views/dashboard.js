@@ -26,7 +26,7 @@ function checks(d) {
   add(!hidden.length, hidden.length ? `「${hidden.join('、')}」沒有內容，前台不會顯示` : '所有開啟的區塊都有內容', '#/appearance');
 
   const m = d.settings.metaDescription;
-  add(!!m && m.length <= 120, !m ? '還沒有填網站說明，搜尋結果會顯示預設文字' : m.length > 120 ? '網站說明太長，搜尋結果會被截掉' : '網站說明長度剛好', '#/profile');
+  add(!!m && m.length <= 120, !m ? '還沒有填網站說明，搜尋結果會顯示預設文字' : m.length > 120 ? '網站說明太長，搜尋結果會被截掉' : '網站說明長度剛好', '#/seo');
   return out;
 }
 
