@@ -30,15 +30,42 @@ export const THEME_PRESETS = [
 
 export const PAPER = '#fdfdfb';
 
-// 搜尋結果（Google）與分享卡片用的標題與說明：沒填就用姓名與首頁文字自動產生。
+// 有獨立網址的頁面：/work/、/stack/、/devlog/、/contact/（首頁是 ''）
+export const SEO_PAGES = ['work', 'stack', 'devlog', 'contact'];
+
+// 搜尋結果（Google）與分享卡片用的標題與說明：沒填就用姓名與頁面內容自動產生。
 // 前台套用到 <title>／<meta>，後台「搜尋結果」頁用同一個函式畫預覽，兩邊才不會不一致。
-export function seoText(d) {
+// page 為空字串是首頁，其餘是 SEO_PAGES 裡的頁面。
+export function seoText(d, page = '') {
   const s = d.settings;
+  if (!page) {
+    return {
+      title: s.siteTitle || `${d.hero.name} · 作品集`,
+      desc: s.metaDescription || [d.hero.tagline, d.hero.intro].filter(Boolean).join(' ').slice(0, 120),
+      titleAuto: !s.siteTitle,
+      descAuto: !s.metaDescription,
+    };
+  }
+  const o = (s.seoPages && s.seoPages[page]) || {};
+  const name = d.hero.name;
+  let auto = '';
+  if (page === 'work') {
+    const names = d.projects.slice(0, 4).map((p) => p.name).join('、');
+    auto = d.projects.length ? `${name}的 ${d.projects.length} 個作品：${names}${d.projects.length > 4 ? ' 等' : ''}。` : `${name}的作品。`;
+  } else if (page === 'stack') {
+    const items = d.stack.flatMap((g) => g.items).slice(0, 8).join('、');
+    auto = items ? `${name}常用的技術：${items} 等。` : `${name}常用的技術。`;
+  } else if (page === 'devlog') {
+    const t = d.logs.map((l) => l.title.trim()).filter(Boolean).slice(0, 3).join('、');
+    auto = t ? `${name}的開發日誌：${t}。` : `${name}的開發日誌。`;
+  } else if (page === 'contact') {
+    auto = `用 Email 或聯絡表單聯絡${name}。`;
+  }
   return {
-    title: s.siteTitle || `${d.hero.name} · 作品集`,
-    desc: s.metaDescription || [d.hero.tagline, d.hero.intro].filter(Boolean).join(' ').slice(0, 120),
-    titleAuto: !s.siteTitle,
-    descAuto: !s.metaDescription,
+    title: o.title || `${SECTION_LABELS[page]} · ${name}`,
+    desc: o.desc || auto.slice(0, 120),
+    titleAuto: !o.title,
+    descAuto: !o.desc,
   };
 }
 
@@ -391,6 +418,10 @@ function normSettings(s) {
   return {
     siteTitle: str(s.siteTitle).trim(),
     metaDescription: str(s.metaDescription).trim(),
+    seoPages: Object.fromEntries(SEO_PAGES.map((k) => {
+      const o = isObj(s.seoPages) && isObj(s.seoPages[k]) ? s.seoPages[k] : {};
+      return [k, { title: str(o.title).trim(), desc: str(o.desc).trim() }];
+    })),
     theme: { ink: hex(t.ink, P.ink), accent: hex(t.accent, P.accent), mark: hex(t.mark, P.mark) },
     footerText: str(s.footerText).trim(),
     sections,

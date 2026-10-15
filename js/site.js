@@ -1,7 +1,7 @@
 // 前台：讀取資料、產生頁面、捲動淡入。
 import {
   DEFAULT_DATA, SECTION_LABELS, STATUS,
-  normalize, fingerprint, esc, safeUrl, safeImg, host, mdLite, fmtDate, themeVars, countTech, isEmail, sectionHasContent, seoText,
+  normalize, fingerprint, esc, safeUrl, safeImg, host, mdLite, fmtDate, themeVars, countTech, isEmail, sectionHasContent, seoText, SEO_PAGES,
 } from './data.js';
 import { loadPublished, readCache, writeCache, readDraft, sendMessage } from './store.js';
 
@@ -18,6 +18,12 @@ const Dev = window.Device || {
   onChange() {},
 };
 const isMobile = () => Dev.current() === 'mobile';
+
+// 獨立頁面：/work/、/stack/、/devlog/、/contact/ 的 <body data-page="…"> 只畫那一個區塊；首頁（沒有 data-page）是單頁捲動
+const PAGE = SEO_PAGES.includes(document.body.dataset.page) ? document.body.dataset.page : '';
+const pagePath = (k) => `/${k}/`;
+// 區塊連結：有獨立頁面的指到那一頁；其餘在首頁用錨點，從別頁過去則回首頁再捲動
+const secHref = (k) => (SEO_PAGES.includes(k) ? pagePath(k) : PAGE ? `/#${k}` : `#${k}`);
 
 let DATA = null;
 let RV = 'reveal'; // 產生 HTML 時使用；資料更新時改成 'reveal in'，避免已經看到的內容再淡入一次
@@ -39,9 +45,12 @@ function hasContent(key) {
 // ============ 各區塊 ============
 // 每個區塊都是兩欄：左邊是標題（桌機會跟著捲動），右邊是內容
 function sec(key, note, body) {
+  const own = PAGE === key;
+  const h = own ? 'h1' : 'h2';
+  const more = !PAGE && SEO_PAGES.includes(key) ? `<a class="btn-link sec-more" href="${pagePath(key)}">前往${SECTION_LABELS[key]}專頁</a>` : '';
   return `
-  <section class="sec" id="${key}"><div class="wrap sec-grid">
-    <div class="sec-head ${RV}"><h2><span>${SECTION_LABELS[key]}</span></h2>${note ? `<p class="sec-note">${note}</p>` : ''}</div>
+  <section class="sec${own ? ' page-sec' : ''}" id="${key}"><div class="wrap sec-grid">
+    <div class="sec-head ${RV}"><${h}><span>${SECTION_LABELS[key]}</span></${h}>${note ? `<p class="sec-note">${note}</p>` : ''}${more}</div>
     <div class="sec-body">${body}</div>
   </div></section>`;
 }
@@ -285,7 +294,7 @@ function switchHtml() {
 
 function footHtml(secs) {
   const d = DATA;
-  const nav = secs.map((s) => `<a href="#${s.key}">${SECTION_LABELS[s.key]}</a>`).join('');
+  const nav = (PAGE ? '<a href="/">首頁</a>' : '') + secs.map((s) => `<a href="${secHref(s.key)}">${SECTION_LABELS[s.key]}</a>`).join('');
   const rows = contactRows().slice(0, 3);
   return `
   <footer class="foot"><div class="wrap">
@@ -296,7 +305,7 @@ function footHtml(secs) {
     </div>
     <div class="foot-base">
       <span>© ${new Date().getFullYear()} ${esc(d.hero.name)}${d.settings.footerText ? '　' + esc(d.settings.footerText) : ''}</span>
-      <span><span class="foot-sw" data-sw>${switchHtml()}</span><a href="#top">回到頂端 <span aria-hidden="true">↑</span></a><a href="admin.html">管理</a></span>
+      <span><span class="foot-sw" data-sw>${switchHtml()}</span><a href="#top">回到頂端 <span aria-hidden="true">↑</span></a><a href="/admin.html">管理</a></span>
     </div>
   </div></footer>`;
 }
@@ -304,34 +313,49 @@ function footHtml(secs) {
 // 手機版的底部導覽：首頁＋最多兩個常用區塊＋「目錄」
 const DOCK_PRIORITY = ['work', 'contact', 'about', 'devlog', 'links', 'stack'];
 function dockHtml(secs) {
-  const keys = DOCK_PRIORITY.filter((k) => secs.some((s) => s.key === k)).slice(0, 2);
+  let keys = DOCK_PRIORITY.filter((k) => secs.some((s) => s.key === k)).slice(0, 2);
+  // 獨立頁面上，目前這一頁一定要在底部導覽裡
+  if (PAGE && secs.some((s) => s.key === PAGE) && !keys.includes(PAGE)) keys = [keys[0], PAGE].filter(Boolean);
   const order = secs.map((s) => s.key).filter((k) => keys.includes(k));
   return `
   <nav class="dock" aria-label="快速切換">
-    <a href="#hero" data-dock="hero"><span>首頁</span></a>
-    ${order.map((k) => `<a href="#${k}" data-dock="${k}"><span>${SECTION_LABELS[k]}</span></a>`).join('')}
+    <a href="${PAGE ? '/' : '#hero'}" data-dock="hero"><span>首頁</span></a>
+    ${order.map((k) => `<a href="${secHref(k)}" data-dock="${k}"${PAGE === k ? ' aria-current="true"' : ''}><span>${SECTION_LABELS[k]}</span></a>`).join('')}
     <button type="button" data-menu aria-haspopup="dialog"><span>目錄</span></button>
   </nav>`;
+}
+
+function emptyPageHtml() {
+  return `
+  <section class="sec page-sec"><div class="wrap">
+    <h1><span>${SECTION_LABELS[PAGE]}</span></h1>
+    <p class="page-empty">這個頁面目前沒有內容。</p>
+    <a class="btn" href="/">回到首頁</a>
+  </div></section>`;
 }
 
 function build() {
   const d = DATA;
   const secs = d.settings.sections.filter((s) => s.visible && hasContent(s.key));
-  const nav = secs.map((s) => `<a href="#${s.key}">${SECTION_LABELS[s.key]}</a>`).join('');
+  // 獨立頁面的頂欄連到各頁；首頁的頂欄是捲動錨點
+  const nav = PAGE
+    ? '<a href="/">首頁</a>' + secs.filter((s) => SEO_PAGES.includes(s.key)).map((s) => `<a href="${pagePath(s.key)}"${s.key === PAGE ? ' aria-current="page"' : ''}>${SECTION_LABELS[s.key]}</a>`).join('')
+    : secs.map((s) => `<a href="#${s.key}">${SECTION_LABELS[s.key]}</a>`).join('');
+  const on = secs.some((s) => s.key === PAGE);
+  const main = PAGE ? (on ? SECTIONS[PAGE]() : emptyPageHtml()) : heroHtml(secs) + secs.map((s) => SECTIONS[s.key]()).join('');
   return `
   <a class="skip" href="#main">跳到主要內容</a>
   <header class="top" id="top"><div class="top-in">
-    <a class="brand" href="#hero">${esc(d.hero.name)}</a>
-    <nav class="nav" aria-label="頁面區塊">${nav}</nav>
-    <span class="top-now" id="topNow" aria-hidden="true"></span>
+    <a class="brand" href="${PAGE ? '/' : '#hero'}">${esc(d.hero.name)}</a>
+    <nav class="nav" aria-label="${PAGE ? '網站頁面' : '頁面區塊'}">${nav}</nav>
+    <span class="top-now" id="topNow" aria-hidden="true">${PAGE ? esc(SECTION_LABELS[PAGE]) : ''}</span>
   </div></header>
   <main id="main">
-    ${heroHtml(secs)}
-    ${secs.map((s) => SECTIONS[s.key]()).join('')}
+    ${main}
   </main>
   ${footHtml(secs)}
   ${dockHtml(secs)}
-  ${MODE === 'preview' ? '<div class="pv-bar"><span>預覽草稿，尚未發布到網站。</span><a href="index.html">離開預覽</a></div>' : ''}`;
+  ${MODE === 'preview' ? '<div class="pv-bar"><span>預覽草稿，尚未發布到網站。</span><a href="/">離開預覽</a></div>' : ''}`;
 }
 
 // ============ 畫面更新 ============
@@ -345,7 +369,7 @@ function applyMeta() {
   const root = document.documentElement;
   const vars = themeVars(s.theme);
   Object.keys(vars).forEach((k) => root.style.setProperty(k, vars[k]));
-  const { title, desc } = seoText(DATA);
+  const { title, desc } = seoText(DATA, PAGE);
   document.title = title;
   setMeta('meta[name="description"]', 'content', desc);
   setMeta('meta[property="og:title"]', 'content', title);
@@ -353,8 +377,15 @@ function applyMeta() {
   setMeta('meta[name="twitter:title"]', 'content', title);
   setMeta('meta[name="twitter:description"]', 'content', desc);
   setMeta('meta[name="theme-color"]', 'content', vars['--paper']);
+  // 獨立頁面如果沒有內容（或被後台隱藏），不讓搜尋引擎收錄
+  if (PAGE && MODE === 'live') {
+    const on = DATA.settings.sections.some((x) => x.key === PAGE && x.visible) && hasContent(PAGE);
+    let r = $('meta[name="robots"]');
+    if (!on && !r) { r = document.createElement('meta'); r.name = 'robots'; document.head.appendChild(r); }
+    if (r) r.setAttribute('content', on ? 'index, follow' : 'noindex');
+  }
   const ld = $('#ld');
-  if (ld && MODE === 'live') {
+  if (ld && MODE === 'live' && !PAGE) {
     const same = [safeUrl(DATA.contact.github), ...DATA.contact.other.map((o) => safeUrl(o.url))].filter(Boolean);
     ld.textContent = JSON.stringify({
       '@context': 'https://schema.org',
@@ -369,7 +400,7 @@ function applyMeta() {
 
 // 捲到哪個區塊，頂欄（電腦）／底部導覽與頂欄小標（手機）就標出對應項目
 let spy = null;
-let currentKey = 'hero';
+let currentKey = PAGE || 'hero';
 function markActive(key) {
   currentKey = key;
   app.querySelectorAll('.nav a').forEach((a) => {
@@ -391,6 +422,7 @@ function markActive(key) {
 
 function observeNav() {
   if (spy) spy.disconnect();
+  if (PAGE) { currentKey = PAGE; return; } // 獨立頁面沒有捲動追蹤，目前項目在產生 HTML 時就標好了
   if (!('IntersectionObserver' in window)) return;
   const ids = ['hero', ...[...app.querySelectorAll('.nav a')].map((a) => a.getAttribute('href').slice(1))];
   spy = new IntersectionObserver(
@@ -449,6 +481,17 @@ function observeReveals() {
   });
 }
 
+// 從別頁連到 /#devlog 這種網址時，內容是 JS 畫出來的，瀏覽器自己的錨點捲動會落空；第一次畫完後補捲一次
+let hashJumped = false;
+function jumpHash() {
+  if (hashJumped) return;
+  hashJumped = true;
+  const id = decodeURIComponent(location.hash.slice(1));
+  if (!/^[a-z]+$/i.test(id)) return;
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ block: 'start' });
+}
+
 function paint(data, { instant = false } = {}) {
   DATA = data;
   RV = instant ? 'reveal in' : 'reveal';
@@ -464,6 +507,7 @@ function paint(data, { instant = false } = {}) {
   onScroll();
   app.style.minHeight = '';
   if (y) window.scrollTo({ top: y, behavior: 'instant' });
+  else if (MODE === 'live') jumpHash();
   RV = 'reveal';
 }
 
@@ -680,8 +724,8 @@ function openMenuSheet(opener) {
     title: '目錄',
     body: `
       <nav class="menu" aria-label="全部區塊">
-        <a href="#hero" data-jump="hero"><span>首頁</span></a>
-        ${secs.map((s) => `<a href="#${s.key}" data-jump="${s.key}"${currentKey === s.key ? ' aria-current="true"' : ''}><span>${SECTION_LABELS[s.key]}</span>${count[s.key] ? `<small>${count[s.key]}</small>` : ''}</a>`).join('')}
+        <a href="${PAGE ? '/' : '#hero'}"${PAGE ? '' : ' data-jump="hero"'}><span>首頁</span></a>
+        ${secs.map((s) => `<a href="${PAGE ? secHref(s.key) : '#' + s.key}"${PAGE ? '' : ` data-jump="${s.key}"`}${currentKey === s.key ? ' aria-current="true"' : ''}><span>${SECTION_LABELS[s.key]}</span>${count[s.key] ? `<small>${count[s.key]}</small>` : ''}</a>`).join('')}
       </nav>
       ${rows.length ? `<div class="sh-links">${rows.map(([label, href, val, ext], i) => `<a class="btn${i ? ' btn-alt' : ''}" href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ''}>${esc(label)}</a>`).join('')}</div>` : ''}
       <p class="menu-sw" data-sw>${switchHtml()}</p>`,
@@ -736,7 +780,7 @@ app.addEventListener('click', (e) => {
     openMenuSheet(e.target.closest('[data-menu]'));
     return;
   }
-  if (e.target.closest('[data-dock="hero"]')) {
+  if (!PAGE && e.target.closest('[data-dock="hero"]')) {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: REDUCE ? 'auto' : 'smooth' });
     return;
