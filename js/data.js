@@ -30,6 +30,18 @@ export const THEME_PRESETS = [
 
 export const PAPER = '#fdfdfb';
 
+// 搜尋結果（Google）與分享卡片用的標題與說明：沒填就用姓名與首頁文字自動產生。
+// 前台套用到 <title>／<meta>，後台「搜尋結果」頁用同一個函式畫預覽，兩邊才不會不一致。
+export function seoText(d) {
+  const s = d.settings;
+  return {
+    title: s.siteTitle || `${d.hero.name} · 作品集`,
+    desc: s.metaDescription || [d.hero.tagline, d.hero.intro].filter(Boolean).join(' ').slice(0, 120),
+    titleAuto: !s.siteTitle,
+    descAuto: !s.metaDescription,
+  };
+}
+
 // ============ 預設內容（雲端沒有資料、或連不上時使用） ============
 export const DEFAULT_DATA = {
   hero: {

@@ -87,16 +87,9 @@ export default {
     </section>
 
     <section class="block">
-      ${blockHead('搜尋引擎', '決定瀏覽器分頁標題，以及 Google 搜尋結果裡的說明文字。')}
-      ${fld('網站標題', `<input data-path="settings.siteTitle" value="${esc(d.settings.siteTitle)}" placeholder="${esc(d.hero.name)} · 作品集" maxlength="60">`, '留空會自動使用「姓名 · 作品集」。')}
-      ${fld('網站說明', `<textarea data-path="settings.metaDescription" rows="2" maxlength="200">${esc(d.settings.metaDescription)}</textarea>`, '<span id="mdCount"></span>')}
+      ${blockHead('搜尋引擎', 'Google 搜尋結果的標題與說明，已搬到獨立的「搜尋結果」頁，那裡有即時預覽。', '<a class="btn btn-sm" href="#/seo">前往「搜尋結果」</a>')}
     </section>`;
 
-    const countMeta = () => {
-      const n = state.draft.settings.metaDescription.length;
-      $('#mdCount', root).textContent = `${n} 字。建議 80 字內，太長會被搜尋結果截掉。`;
-    };
-    countMeta();
 
     // ---- 頭像 ----
     const prev = $('#avPrev', root);
@@ -173,7 +166,6 @@ export default {
 
     bindPaths(root, (path, v) => {
       mutate(LABEL, (x) => setPath(x, path, v));
-      if (path === 'settings.metaDescription') countMeta();
     });
   },
 };

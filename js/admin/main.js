@@ -10,6 +10,7 @@ import stack from './views/stack.js';
 import logs from './views/logs.js';
 import links from './views/links.js';
 import appearance from './views/appearance.js';
+import seo from './views/seo.js';
 import messages, { refreshUnread } from './views/messages.js';
 import backup from './views/backup.js';
 
@@ -21,7 +22,7 @@ const isMobile = () => Dev.current() === 'mobile';
 
 // 手機底部分頁列：最常用的四個＋「更多」
 const TAB_KEYS = ['dashboard', 'projects', 'logs', 'messages'];
-const MORE_KEYS = ['profile', 'stack', 'links', 'appearance', 'backup'];
+const MORE_KEYS = ['profile', 'stack', 'links', 'appearance', 'seo', 'backup'];
 const ICONS = {
   dashboard: '<path d="M4 5h7v7H4zM13 5h7v4h-7zM13 11h7v8h-7zM4 14h7v5H4z"/>',
   projects: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
@@ -45,6 +46,7 @@ const VIEWS = [
   { key: 'logs', label: '日誌', view: logs, anchor: '#devlog' },
   { key: 'links', label: '連結', view: links, anchor: '#links' },
   { key: 'appearance', label: '外觀', view: appearance, anchor: '#top' },
+  { key: 'seo', label: '搜尋結果', view: seo, anchor: '#top' },
   { key: 'messages', label: '訊息', view: messages, anchor: '#contact', badge: true },
   { key: 'backup', label: '備份與紀錄', view: backup, anchor: '#top' },
 ];
