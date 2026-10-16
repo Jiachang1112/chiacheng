@@ -376,6 +376,7 @@ function applyMeta() {
   const { title, desc } = seoText(DATA, PAGE);
   document.title = title;
   setMeta('meta[name="description"]', 'content', desc);
+  setMeta('meta[property="og:site_name"]', 'content', DATA.hero.name);
   setMeta('meta[property="og:title"]', 'content', title);
   setMeta('meta[property="og:description"]', 'content', desc);
   setMeta('meta[name="twitter:title"]', 'content', title);
