@@ -44,6 +44,10 @@ function hasContent(key) {
 
 // ============ 各區塊 ============
 // 每個區塊都是兩欄：左邊是標題（桌機會跟著捲動），右邊是內容
+// 首頁只讓「關於」與開頭的介紹出現在 Google 的搜尋結果說明裡。
+// 作品列、技術、日誌、聯絡的字各有專頁，data-nosnippet 讓 Google 不要拿它們來當首頁的說明文字。
+const NS = PAGE ? '' : ' data-nosnippet';
+
 function sec(key, note, body) {
   const own = PAGE === key;
   const h = own ? 'h1' : 'h2';
@@ -51,7 +55,7 @@ function sec(key, note, body) {
   return `
   <section class="sec${own ? ' page-sec' : ''}" id="${key}"><div class="wrap sec-grid">
     <div class="sec-head ${RV}"><${h}><span>${SECTION_LABELS[key]}</span></${h}>${note ? `<p class="sec-note">${note}</p>` : ''}${more}</div>
-    <div class="sec-body">${body}</div>
+    <div class="sec-body"${key === 'about' ? '' : NS}>${body}</div>
   </div></section>`;
 }
 
@@ -67,7 +71,7 @@ function noteCardHtml(hasWork) {
   if (!list.length) return '';
   const t = countTech(DATA.projects);
   return `
-  <aside class="notecard ${RV}" style="--i:2" aria-labelledby="nc-t">
+  <aside class="notecard ${RV}" style="--i:2" aria-labelledby="nc-t"${NS}>
     <span class="tape" aria-hidden="true"></span>
     <div class="nc-head"><h2 id="nc-t">正在線上運作</h2><span class="nc-count">${total}</span></div>
     <ul class="nc-list">
