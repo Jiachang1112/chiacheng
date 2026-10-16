@@ -46,11 +46,52 @@ export const authKit = once(async () => {
 });
 
 // ============ 前台讀取 ============
+// Firestore 的 REST 回傳會把每個值包成 {stringValue: …}、{mapValue: …}，這裡還原成一般物件
+function fromFs(v) {
+  if (!v || typeof v !== 'object') return null;
+  if ('stringValue' in v) return v.stringValue;
+  if ('integerValue' in v) return Number(v.integerValue);
+  if ('doubleValue' in v) return v.doubleValue;
+  if ('booleanValue' in v) return v.booleanValue;
+  if ('timestampValue' in v) return v.timestampValue;
+  if ('arrayValue' in v) return (v.arrayValue.values || []).map(fromFs);
+  if ('mapValue' in v) {
+    const o = {};
+    const f = v.mapValue.fields || {};
+    Object.keys(f).forEach((k) => { o[k] = fromFs(f[k]); });
+    return o;
+  }
+  return null;
+}
+
+// 用一般的 GET 讀公開文件。SDK 讀取靠長連線（Listen/channel），Googlebot 轉譯網頁時這條連線會失敗，
+// 結果 Google 看到的是預設內容、不是後台發布的內容；GET 是普通請求，爬蟲和一般瀏覽器都能順利讀到。
+async function fetchRest() {
+  const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/${SITE_DOC.join('/')}`;
+  const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+  const timer = ctl ? setTimeout(() => ctl.abort(), 6000) : 0;
+  try {
+    const res = await fetch(url, { cache: 'no-store', signal: ctl ? ctl.signal : undefined });
+    if (res.status === 404) return null; // 還沒發布過
+    if (!res.ok) throw new Error('rest ' + res.status);
+    const doc = await res.json();
+    return fromFs({ mapValue: { fields: doc.fields || {} } });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // 回傳整理過的資料；雲端還沒有資料時回傳 null；連線失敗會丟錯誤
 export async function loadPublished() {
-  const { m, db } = await firestore();
-  const snap = await m.getDoc(m.doc(db, ...SITE_DOC));
-  return snap.exists() ? normalize(snap.data()) : null;
+  try {
+    const raw = await fetchRest();
+    return raw ? normalize(raw) : null;
+  } catch (e) {
+    // REST 失敗（網路、被擋）再退回 SDK
+    const { m, db } = await firestore();
+    const snap = await m.getDoc(m.doc(db, ...SITE_DOC));
+    return snap.exists() ? normalize(snap.data()) : null;
+  }
 }
 
 export function readCache() {

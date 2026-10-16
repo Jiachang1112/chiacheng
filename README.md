@@ -119,6 +119,7 @@ flowchart LR
 
 - 網站是**純靜態檔案**，不需要 `npm install`，也不需要 build，丟到任何靜態主機就能跑。
 - 內容整份存在 Firestore 的**一份文件**裡（`portfolio/site_data_v1`）。Firebase 連不上時，前台會用內建的預設內容顯示，不會整頁空白。
+- 前台讀內容用一般的 `GET` 請求（Firestore REST），失敗才退回 Firebase SDK。原因是 Google 的爬蟲轉譯網頁時，SDK 的長連線會失敗，用 SDK 讀的話 Google 只會看到預設內容，後台改的標題與說明不會出現在搜尋結果。
 - 首頁與四個專頁共用同一支 `js/site.js`：頁面的 `<body data-page="…">` 決定只畫哪一個區塊，首頁則畫全部。
 - 管理後台是同一個專案裡的獨立頁面，用 Firebase Authentication 的 Email／密碼登入。
 
@@ -552,6 +553,7 @@ flowchart TD
 | 結構化資料 | 首頁 JSON-LD（Person）、專頁 BreadcrumbList | 讓 Google 看懂網站結構 |
 | 網站地圖 | `sitemap.xml` | 列出 5 個網址與更新日期 |
 | 爬蟲規則 | `robots.txt` | 允許全站，並指向 sitemap |
+| Google 看到的內容 | `js/store.js` | 前台用 `GET` 讀已發布的內容，Google 轉譯網頁時讀得到，標題、說明與內文才會和後台一致 |
 | 搜尋結果的說明文字 | 首頁 | 作品、技術、日誌、聯絡區塊設了 `data-nosnippet`，Google 不會拿專案清單的字當首頁說明，會優先用你寫的說明與「關於」 |
 | 不要收錄的頁面 | 管理後台、`404.html`、被隱藏或沒有內容的專頁 | 已設 `noindex` |
 | 沒有 JavaScript 時 | `<noscript>` | 該頁的標題與簡介，加上回首頁與 GitHub 連結的靜態文字 |
@@ -625,6 +627,16 @@ Firebase → Authentication → Settings → 已授權網域，加入你的網�
 
 1. 確認有按「發布」，草稿不會上線。
 2. 重新整理頁面。前台會先用瀏覽器暫存的內容畫出來，再向雲端抓最新版更新。
+
+</details>
+
+<details>
+<summary><b>後台改了標題，Google 搜尋結果還是舊的</b></summary>
+
+1. 先確認有按「發布」，草稿不會上線。
+2. 到 Search Console → 網址審查，貼上網址，按「查看已檢索的網頁」，在 HTML 分頁看 Google 抓到的 `<title>` 與 `description`。如果看到的是預設內容（不是後台設定的），到「更多資訊 → 網頁資源」確認 `firestore.googleapis.com` 有沒有載入失敗。
+3. 內容一致後，對該頁按「要求建立索引」，搜尋結果通常幾天內才會換成新的。
+4. 說明文字最後由 Google 決定，不保證完全照你寫的。
 
 </details>
 
