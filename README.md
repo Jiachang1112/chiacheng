@@ -552,6 +552,7 @@ flowchart TD
 | 結構化資料 | 首頁 JSON-LD（Person）、專頁 BreadcrumbList | 讓 Google 看懂網站結構 |
 | 網站地圖 | `sitemap.xml` | 列出 5 個網址與更新日期 |
 | 爬蟲規則 | `robots.txt` | 允許全站，並指向 sitemap |
+| 搜尋結果的說明文字 | 首頁 | 作品、技術、日誌、聯絡區塊設了 `data-nosnippet`，Google 不會拿專案清單的字當首頁說明，會優先用你寫的說明與「關於」 |
 | 不要收錄的頁面 | 管理後台、`404.html`、被隱藏或沒有內容的專頁 | 已設 `noindex` |
 | 沒有 JavaScript 時 | `<noscript>` | 該頁的標題與簡介，加上回首頁與 GitHub 連結的靜態文字 |
 
