@@ -309,7 +309,7 @@ function footHtml(secs) {
     </div>
     <div class="foot-base">
       <span>© ${new Date().getFullYear()} ${esc(d.hero.name)}${d.settings.footerText ? '　' + esc(d.settings.footerText) : ''}</span>
-      <span><span class="foot-sw" data-sw>${switchHtml()}</span><a href="#top">回到頂端 <span aria-hidden="true">↑</span></a><a href="/admin.html">管理</a></span>
+      <span><span class="foot-sw" data-sw>${switchHtml()}</span><a href="#top">回到頂端 <span aria-hidden="true">↑</span></a></span>
     </div>
   </div></footer>`;
 }
