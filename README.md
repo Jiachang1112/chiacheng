@@ -94,7 +94,7 @@ Firestore 規則只讓你指定的信箱寫入，訪客只能讀取內容、送�
 - 首頁每個區塊右上角有「前往…專頁」連結。
 - 每一頁都有自己的標題、說明與正式網址，後台「搜尋結果」可以分別修改。
 - 在後台把某個區塊隱藏或清空時，對應頁面會顯示「沒有內容」，並自動加上 `noindex`，不會被 Google 收錄。
-- 舊網址 `/post-example/` 會自動轉到 `/devlog/`。
+- 舊網址 `/post-example.html`、`/post-example/` 會自動轉到 `/devlog/`。
 
 ---
 
@@ -132,6 +132,7 @@ chiacheng/
 ├── stack/index.html        技術專頁   /stack/
 ├── devlog/index.html       日誌專頁   /devlog/
 ├── contact/index.html      聯絡專頁   /contact/
+├── post-example.html       舊網址，轉到 /devlog/
 ├── post-example/           舊網址，轉到 /devlog/
 ├── 404.html                找不到頁面
 ├── firestore.rules         Firestore 安全規則（要貼到 Firebase 主控台）
