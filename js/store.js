@@ -1,5 +1,5 @@
 // Firebase 連線層。SDK 用動態載入：就算 Google 的 CDN 連不上，網站仍會用預設內容顯示，不會整頁空白。
-import { normalize, LS } from './data.js';
+import { normalize, LS } from './data.js?v=20261025';
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.12.2/';
 

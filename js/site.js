@@ -2,8 +2,8 @@
 import {
   DEFAULT_DATA, SECTION_LABELS, STATUS,
   normalize, fingerprint, esc, safeUrl, safeImg, host, mdLite, fmtDate, themeVars, countTech, isEmail, sectionHasContent, seoText, SEO_PAGES,
-} from './data.js';
-import { loadPublished, readCache, writeCache, readDraft, sendMessage } from './store.js';
+} from './data.js?v=20261025';
+import { loadPublished, readCache, writeCache, readDraft, sendMessage } from './store.js?v=20261025';
 
 const params = new URLSearchParams(location.search);
 // live：一般瀏覽；embed：被後台的即時預覽嵌入；preview：後台「在新分頁預覽」
